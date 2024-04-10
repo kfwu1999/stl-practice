@@ -17,3 +17,20 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for clangd
 #-------------------------------------------------------------------------------
 include_directories(include)
 add_executable(main main.cpp)
+
+
+#-------------------------------------------------------------------------------
+#  - Google Test Setup
+#-------------------------------------------------------------------------------
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+#
+add_executable(test_vector test/test_vector.cpp)
+
+#
+target_link_libraries(test_vector GTest::GTest GTest::Main)
+
+#
+add_test(NAME test_vector COMMAND test_vector)

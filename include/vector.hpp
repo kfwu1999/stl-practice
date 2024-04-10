@@ -1,5 +1,9 @@
 /**
  * \file vector.hpp
+
+ * \reference:
+ * - The Cherno: VECTOR/DYNAMIC ARRAY - Making DATA STRUCTURES in C++
+ *          url: https://youtu.be/ryRf4Jh_YC0?si=9gncPajBHf4uIz-T
  */
 
 #pragma once

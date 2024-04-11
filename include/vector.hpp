@@ -4,6 +4,8 @@
  * \reference:
  * - The Cherno: VECTOR/DYNAMIC ARRAY - Making DATA STRUCTURES in C++
  *          url: https://youtu.be/ryRf4Jh_YC0?si=9gncPajBHf4uIz-T
+ * - The Cherno: Writing an ITERATOR in C++
+ *          url: https://youtu.be/F9eDv-YIOQ0?si=BHQ1Nyq6Jo0cUd1R
  */
 
 #pragma once
@@ -11,12 +13,63 @@
 #ifndef VECTOR_HPP_
 #define VECTOR_HPP_
 
-#include <cstddef>   // size_t
-#include <utility>   // move, forward
-#include <new>       // ::operator new, ::operator delete
+#include <cstddef>          // size_t
+#include <utility>          // move, forward
+#include <new>              // ::operator new, ::operator delete
+#include <initializer_list> // initializer_list
 
 
 namespace mystl {
+
+
+/**
+ * \class VectorIterator
+ */
+template <typename Vector>
+class VectorIterator {
+public:
+    using ValueType      = typename Vector::ValueType;
+    using Pointer        = ValueType*;
+    using Reference      = ValueType&;
+
+public:
+    VectorIterator(Pointer ptr)
+        : p_ptr(ptr) {}
+
+public:
+    VectorIterator& operator++() {
+        p_ptr++;
+        return *this;
+    }
+
+    VectorIterator& operator--() {
+        p_ptr--;
+        return *this;
+    }
+
+    Reference operator[](int index) {
+        return *(p_ptr + index);
+    }
+
+    Pointer operator->() {
+        return p_ptr;
+    }
+
+    Reference operator*() {
+        return *p_ptr;
+    }
+
+    bool operator==(const VectorIterator& other) const {
+        return p_ptr == other.p_ptr;
+    }
+
+    bool operator!=(const VectorIterator& other) const {
+        return p_ptr != other.p_ptr;
+    }
+
+private:
+    Pointer p_ptr;
+};
 
 
 /**
@@ -27,16 +80,17 @@ namespace mystl {
  */
 template <typename T>
 class Vector {
-private:
+public:
     using ValueType      = T;
     using Pointer        = T*;
     using Reference      = T&;
     using ConstPointer   = const T*;
     using ConstReference = const T&;
+    using Iterator       = VectorIterator<Vector<ValueType>>;
 
 private:
-    static constexpr size_t DEFAULT_CAPACITY = 10;
-    static constexpr size_t REALLOC_RATE     = 2;
+    static constexpr std::size_t DEFAULT_CAPACITY = 10;
+    static constexpr std::size_t REALLOC_RATE     = 2;
 
 public:
     /**
@@ -44,10 +98,22 @@ public:
      */
     Vector() 
         : m_size(0), m_capacity(DEFAULT_CAPACITY), 
-          p_data((Pointer)::operator new(DEFAULT_CAPACITY * sizeof(ValueType)))
+          p_data(static_cast<Pointer>(::operator new(DEFAULT_CAPACITY * sizeof(ValueType))))
     {
     }
 
+    /**
+     * \brief Construct by initializer.
+     */
+    Vector(std::initializer_list<ValueType> initList) 
+        : m_size(initList.size()), m_capacity(DEFAULT_CAPACITY), 
+          p_data(static_cast<Pointer>(::operator new(DEFAULT_CAPACITY * sizeof(ValueType))))
+    {
+        std::size_t i = 0;
+        for (auto& elem : initList) {
+            new(&p_data[i++]) ValueType(elem);   // in-place construct
+        }
+    }
 
     /**
      * \brief Destructor for the Vector.
@@ -58,6 +124,21 @@ public:
     ~Vector() {
         clear();
         destroyVector();
+    }
+
+
+public:
+    /**
+     */
+    Iterator begin() {
+        return Iterator(p_data);
+    }
+
+
+    /**
+     */
+    Iterator end() {
+        return Iterator(p_data + m_size);
     }
 
 
@@ -100,7 +181,6 @@ public:
         }
         return *this;
     }
-
 
     /**
      */
@@ -178,15 +258,16 @@ private:
      *
      * \param newCapacity
      */
-    void realloc(size_t newCapacity) {
+    void realloc(std::size_t newCapacity) {
         // allocate a new block of memory
-        Pointer newBlock = (Pointer)::operator new(newCapacity * sizeof(ValueType));
+        Pointer newBlock = static_cast<Pointer>(::operator new(newCapacity * sizeof(ValueType)));
 
         // copy/move old elements into new block
         if (newCapacity < m_size) {
             m_size = newCapacity;
         }
-        for (size_t i = 0; i < m_size; ++i) {
+
+        for (std::size_t i = 0; i < m_size; ++i) {
             new(&newBlock[i]) ValueType(std::move(p_data[i]));
         }
 
@@ -210,9 +291,9 @@ private:
     }
 
 private:
-    size_t  m_size     = 0;
-    size_t  m_capacity = 0;
-    Pointer p_data     = nullptr;
+    std::size_t m_size     = 0;
+    std::size_t m_capacity = 0;
+    Pointer     p_data     = nullptr;
 };
 
 

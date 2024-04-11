@@ -107,6 +107,83 @@ TEST(VectorTest, CorrectlyManagesResourcesWithDynamicAllocation) {
 }
 
 
+/**
+ * Test Case: ConstructAndAssign
+ */
+TEST(VectorIteratorTest, ConstructAndAssign) {
+    // 
+    mystl::Vector<int> vec = {1, 2, 3, 4, 5};
+    mystl::Vector<int>::Iterator it = vec.begin();
+
+    // 
+    EXPECT_EQ(1, *it);
+
+    // construct by copy
+    mystl::Vector<int>::Iterator it2 = it;
+    EXPECT_EQ(1, *it2);
+}
+
+
+/**
+ * Test Case: Dereference
+ */
+TEST(VectorIteratorTest, Dereference) {
+    // 
+    mystl::Vector<std::string> vec = {"123", "test"};
+    mystl::Vector<std::string>::Iterator it = vec.begin();
+
+    // 
+    EXPECT_EQ(3, it->size());
+    EXPECT_EQ("test", *(++it));
+}
+
+
+/**
+ * Test case: Iteratoin
+ */
+TEST(VectorIteratorTest, Iteration) {
+    // 
+    mystl::Vector<int> vec = {1, 2, 3, 4, 5};
+    int i = 1;
+
+    for (mystl::Vector<int>::Iterator it = vec.begin(); it != vec.end(); ++it) {
+        EXPECT_EQ(i++, *it);
+    }
+}
+
+
+/**
+ * Test case: IncrementAndDecrement
+ */
+TEST(VectorIteratorTest, IncrementAndDecrement) {
+    // 
+    mystl::Vector<int> vec = {1, 2, 3};
+    mystl::Vector<int>::Iterator it = vec.begin();
+
+    // 
+    EXPECT_EQ(2, *(++it));
+    EXPECT_EQ(3, *(++it));
+    EXPECT_EQ(2, *(--it));
+}
+
+
+/**
+ * Test case: EqualityAndInequality
+ */
+TEST(VectorIteratorTest, EqualityAndInequality) {
+    mystl::Vector<int> vec = {1, 2};
+    auto it1 = vec.begin();
+    auto it2 = vec.begin();
+    auto it3 = vec.end();
+
+    EXPECT_TRUE(it1 == it2);
+    EXPECT_FALSE(it1 != it2);
+    EXPECT_TRUE(it1 != it3);
+    EXPECT_FALSE(it1 == it3);
+}
+
+
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

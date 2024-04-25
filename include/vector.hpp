@@ -17,6 +17,7 @@
 #include <utility>          // move, forward
 #include <new>              // ::operator new, ::operator delete
 #include <initializer_list> // initializer_list
+#include <stdexcept>        // out_of_range
 
 
 namespace mystl {
@@ -25,15 +26,15 @@ namespace mystl {
 /**
  * \class VectorIterator
  */
-template <typename Vector>
+template <typename _vector>
 class VectorIterator {
 public:
-    using ValueType      = typename Vector::ValueType;
-    using Pointer        = ValueType*;
-    using Reference      = ValueType&;
+    using value_type      = typename _vector::value_type;
+    using pointer        = value_type*;
+    using reference      = value_type&;
 
 public:
-    VectorIterator(Pointer ptr)
+    VectorIterator(pointer ptr)
         : p_ptr(ptr) {}
 
 public:
@@ -47,15 +48,15 @@ public:
         return *this;
     }
 
-    Reference operator[](int index) {
+    reference operator[](int index) {
         return *(p_ptr + index);
     }
 
-    Pointer operator->() {
+    pointer operator->() {
         return p_ptr;
     }
 
-    Reference operator*() {
+    reference operator*() {
         return *p_ptr;
     }
 
@@ -68,90 +69,139 @@ public:
     }
 
 private:
-    Pointer p_ptr;
+    pointer p_ptr;
 };
 
 
 /**
- * \class Vector
+ * \class vector
  *
  * A template class of a simplified version of the std::vector,
  * providing dynamic array functionality with the ability to resize.
  */
-template <typename T>
-class Vector {
+template <typename _T>
+class vector {
 public:
-    using ValueType      = T;
-    using Pointer        = T*;
-    using Reference      = T&;
-    using ConstPointer   = const T*;
-    using ConstReference = const T&;
-    using Iterator       = VectorIterator<Vector<ValueType>>;
+    using value_type      = _T;
+    using size_type       = std::size_t;
+    using pointer         = _T*;
+    using reference       = _T&;
+    using const_pointer   = const _T*;
+    using const_reference = const _T&;
+    using iterator        = VectorIterator<vector<value_type>>;
+    using const_iterator  = const iterator;
 
 private:
-    static constexpr std::size_t DEFAULT_CAPACITY = 10;
-    static constexpr std::size_t REALLOC_RATE     = 2;
+    static constexpr size_type DEFAULT_CAPACITY = 10;
+    static constexpr size_type REALLOC_RATE     = 2;
 
 public:
     /**
      * \brief Construct new vector with default initial capacity.
      */
-    Vector() 
+    vector() 
         : m_size(0), m_capacity(DEFAULT_CAPACITY), 
-          p_data(static_cast<Pointer>(::operator new(DEFAULT_CAPACITY * sizeof(ValueType))))
+          p_elem(static_cast<pointer>(::operator new(DEFAULT_CAPACITY * sizeof(value_type))))
     {
     }
 
     /**
      * \brief Construct by initializer.
      */
-    Vector(std::initializer_list<ValueType> initList) 
+    vector(std::initializer_list<value_type> initList) 
         : m_size(initList.size()), m_capacity(DEFAULT_CAPACITY), 
-          p_data(static_cast<Pointer>(::operator new(DEFAULT_CAPACITY * sizeof(ValueType))))
+          p_elem(static_cast<pointer>(::operator new(DEFAULT_CAPACITY * sizeof(value_type))))
     {
-        std::size_t i = 0;
+        size_type i = 0;
         for (auto& elem : initList) {
-            new(&p_data[i++]) ValueType(elem);   // in-place construct
+            new(&p_elem[i++]) value_type(elem);   // in-place construct
         }
     }
 
     /**
-     * \brief Destructor for the Vector.
+     * \brief Destructor for the vector.
      * 
      * Destroys all elements in the vector and deallocates the memory block
      * allocated for the vector's storage.
      */
-    ~Vector() {
+    ~vector() {
         clear();
-        destroyVector();
+        destroyvector();
     }
 
-
+/* Operators */
 public:
     /**
      */
-    Iterator begin() {
-        return Iterator(p_data);
+    reference operator[](size_type index) { return p_elem[index]; }
+    const_reference operator[](size_type index) const { return p_elem[index]; }
+
+    /**
+     */
+    vector& operator=(const_reference other) {
+        if (this != other) {
+        }
+        return *this;
     }
+
+    /**
+     */
+    vector& operator=(value_type&& other) {
+        if (this != other) {
+        }
+        return *this;
+    }
+
+
+/* Element Access */
+public:
+    /**
+     * \brief Access specified element with bounds checking
+     *
+     * Returns a reference to the element at specified location pos, with 
+     * bounds checking. If pos is not within the range of the container, an 
+     * exception of type std::out_of_range is thrown.
+     *
+     * \ref cppreference.com
+     */
+    reference at(size_type pos) {
+        if (pos >= m_size)
+            throw std::out_of_range("vector::at");
+        return p_elem[pos];
+    }
+
+    const_reference at(size_type pos) const {
+        if (pos >= m_size)
+            throw std::out_of_range("vector::at");
+        return p_elem[pos];
+    }
+
+
+/* Iterators */
+public:
+    /**
+     */
+    iterator begin() { return iterator(p_elem); }
+    const_iterator begin() const { return iterator(p_elem); }
 
 
     /**
      */
-    Iterator end() {
-        return Iterator(p_data + m_size);
-    }
+    iterator end() { return iterator(p_elem + m_size); }
+    const_iterator end() const { return iterator(p_elem + m_size); }
 
 
+/* Capacity */
 public:
     /**
      * \brief Return size.
      */
-    std::size_t size() const { return m_size; }
+    size_type size() const { return m_size; }
 
     /**
      * \brief Return size of allocated storage capacity.
      */
-    std::size_t capacity() const { return m_capacity; }
+    size_type capacity() const { return m_capacity; }
 
     /**
      * \brief Test whether vector is empty.
@@ -159,58 +209,27 @@ public:
     bool empty() const { return m_size == 0; }
 
 
-public:
-    /**
-     */
-    Reference operator[](std::size_t index) {
-        // TODO: Add boundary check in debug mode
-        return p_data[index];
-    }
-
-    /**
-     */
-    ConstReference operator[](std::size_t index) const {
-        // TODO: Add boundary check in debug mode
-        return p_data[index];
-    }
-
-    /**
-     */
-    Vector& operator=(ConstReference other) {
-        if (this != other) {
-        }
-        return *this;
-    }
-
-    /**
-     */
-    Vector& operator=(ValueType&& other) {
-        if (this != other) {
-        }
-        return *this;
-    }
-
-
+/* Modifiers */
 public:
     /**
      * \brief Insert at the end of the vector.
      */
-    void pushBack(ConstReference value) {
+    void push_back(const_reference value) {
         if (m_size >= m_capacity) {
             realloc(REALLOC_RATE * m_capacity);
         }
-        p_data[m_size++] = value;
+        p_elem[m_size++] = value;
     }
 
 
     /**
      * \brief Insert at the end of the vector.
      */
-    void pushBack(ValueType&& value) {
+    void push_back(value_type&& value) {
         if (m_size >= m_capacity) {
             realloc(REALLOC_RATE * m_capacity);
         }
-        p_data[m_size++] = std::move(value);   // cast value to rval reference
+        p_elem[m_size++] = std::move(value);   // cast value to rval reference
     }
 
 
@@ -218,22 +237,22 @@ public:
      * \brief Construct and insert at the end of the vector.
      */
     template <typename... Args>
-    Reference emplaceBack(Args&&... args) {
+    reference emplace_back(Args&&... args) {
         if (m_size >= m_capacity) {
             realloc(REALLOC_RATE * m_capacity);
         }
-        // p_data[m_size] = ValueType(std::forward<Args>(args)...);
-        new(&p_data[m_size]) ValueType(std::forward<Args>(args)...);   // in-place construction
-        return p_data[m_size++];
+        // p_elem[m_size] = value_type(std::forward<Args>(args)...);
+        new(&p_elem[m_size]) value_type(std::forward<Args>(args)...);   // in-place construction
+        return p_elem[m_size++];
     }
 
 
     /**
      * \brief Delete the last element.
      */
-    void popBack() {
+    void pop_back() {
         if (m_size > 0) {
-            p_data[--m_size].~ValueType();
+            p_elem[--m_size].~value_type();
         }
     }
 
@@ -245,8 +264,8 @@ public:
      * destroying all contained objects and resetting the vector's size to 0.
      */
     void clear() {
-        for (std::size_t i = 0; i < m_size; ++i) {
-            p_data[i].~ValueType();
+        for (size_type i = 0; i < m_size; ++i) {
+            p_elem[i].~value_type();
         }
         m_size = 0;
     }
@@ -258,23 +277,23 @@ private:
      *
      * \param newCapacity
      */
-    void realloc(std::size_t newCapacity) {
+    void realloc(size_type newCapacity) {
         // allocate a new block of memory
-        Pointer newBlock = static_cast<Pointer>(::operator new(newCapacity * sizeof(ValueType)));
+        pointer newBlock = static_cast<pointer>(::operator new(newCapacity * sizeof(value_type)));
 
         // copy/move old elements into new block
         if (newCapacity < m_size) {
             m_size = newCapacity;
         }
 
-        for (std::size_t i = 0; i < m_size; ++i) {
-            new(&newBlock[i]) ValueType(std::move(p_data[i]));
+        for (size_type i = 0; i < m_size; ++i) {
+            new(&newBlock[i]) value_type(std::move(p_elem[i]));
         }
 
         // 
         clear();
-        destroyVector();
-        p_data = newBlock;
+        destroyvector();
+        p_elem = newBlock;
         m_capacity = newCapacity;
     }
 
@@ -285,15 +304,15 @@ private:
      * Deallocate the memory block allocated for the vector's storage without
      * calling the contained elements' destructors.
      */
-    void destroyVector() {
-        // delete[] p_data;
-        ::operator delete(p_data);
+    void destroyvector() {
+        // delete[] p_elem;
+        ::operator delete(p_elem);
     }
 
 private:
-    std::size_t m_size     = 0;
-    std::size_t m_capacity = 0;
-    Pointer     p_data     = nullptr;
+    size_type m_size     = 0;
+    size_type m_capacity = 0;
+    pointer   p_elem     = nullptr;
 };
 
 

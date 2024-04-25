@@ -9,8 +9,8 @@
 /**
  * Test Case: DefaultConstructor
  */
-TEST(VectorTest, DefaultConstructor) {
-    mystl::Vector<int> vec;
+TEST(vectorTest, DefaultConstructor) {
+    mystl::vector<int> vec;
     EXPECT_EQ(0, vec.size());
 }
 
@@ -18,10 +18,10 @@ TEST(VectorTest, DefaultConstructor) {
 /**
  * Test Case: PushBackLValue
  */
-TEST(VectorTest, PushBackLValue) {
-    mystl::Vector<int> vec;
+TEST(vectorTest, PushBackLValue) {
+    mystl::vector<int> vec;
     int value = 42;
-    vec.pushBack(value);
+    vec.push_back(value);
     EXPECT_EQ(1, vec.size());
     EXPECT_EQ(42, vec[0]); 
 }
@@ -30,9 +30,9 @@ TEST(VectorTest, PushBackLValue) {
 /**
  * Test Case: PushBackRValue
  */
-TEST(VectorTest, PushBackRValue) {
-    mystl::Vector<int> vec;
-    vec.pushBack(42);
+TEST(vectorTest, PushBackRValue) {
+    mystl::vector<int> vec;
+    vec.push_back(42);
     EXPECT_EQ(1, vec.size());
     EXPECT_EQ(42, vec[0]);
 }
@@ -41,22 +41,22 @@ TEST(VectorTest, PushBackRValue) {
 /**
  * Test Case: EmplaceBack
  */
-TEST(VectorTest, EmplaceBack) {
-    mystl::Vector<std::pair<int, int>> vec;
-    vec.emplaceBack(1, 2);
+TEST(vectorTest, EmplaceBack) {
+    mystl::vector<std::pair<int, int>> vec;
+    vec.emplace_back(1, 2);
     EXPECT_EQ(1, vec.size());
     EXPECT_EQ(std::make_pair(1, 2), vec[0]);
 }
 
 
 /**
- * Test Case: PopBack
+ * Test Case: pop_back
  */
-TEST(VectorTest, PopBack) {
-    mystl::Vector<int> vec;
-    vec.pushBack(42);
+TEST(vectorTest, pop_back) {
+    mystl::vector<int> vec;
+    vec.push_back(42);
     EXPECT_EQ(1, vec.size());
-    vec.popBack();
+    vec.pop_back();
     EXPECT_EQ(true, vec.empty());
 }
 
@@ -65,13 +65,13 @@ TEST(VectorTest, PopBack) {
  * Test Case: CorrectlyManagesResourcesWithDynamicAllocation
  *
  * Purpose:
- * This test is designed to verify the Vector class's capability to safely destruct objects 
- * with dynamically allocated memory, and have been moved into the vector using pushBack.
+ * This test is designed to verify the vector class's capability to safely destruct objects 
+ * with dynamically allocated memory, and have been moved into the vector using push_back.
  *
  * Note: Failure of this test may result in a "pointer being freed was not
  * allocated" error message, indicating improper management of dynamic memory.
  */
-TEST(VectorTest, CorrectlyManagesResourcesWithDynamicAllocation) {
+TEST(vectorTest, CorrectlyManagesResourcesWithDynamicAllocation) {
     // 
     class MyClass {
     public:
@@ -102,24 +102,24 @@ TEST(VectorTest, CorrectlyManagesResourcesWithDynamicAllocation) {
     };
 
     // 
-    mystl::Vector<MyClass> vec;
-    vec.pushBack(MyClass());
+    mystl::vector<MyClass> vec;
+    vec.push_back(MyClass());
 }
 
 
 /**
  * Test Case: ConstructAndAssign
  */
-TEST(VectorIteratorTest, ConstructAndAssign) {
+TEST(vectorIteratorTest, ConstructAndAssign) {
     // 
-    mystl::Vector<int> vec = {1, 2, 3, 4, 5};
-    mystl::Vector<int>::Iterator it = vec.begin();
+    mystl::vector<int> vec = {1, 2, 3, 4, 5};
+    mystl::vector<int>::iterator it = vec.begin();
 
     // 
     EXPECT_EQ(1, *it);
 
     // construct by copy
-    mystl::Vector<int>::Iterator it2 = it;
+    mystl::vector<int>::iterator it2 = it;
     EXPECT_EQ(1, *it2);
 }
 
@@ -127,10 +127,10 @@ TEST(VectorIteratorTest, ConstructAndAssign) {
 /**
  * Test Case: Dereference
  */
-TEST(VectorIteratorTest, Dereference) {
+TEST(vectorIteratorTest, Dereference) {
     // 
-    mystl::Vector<std::string> vec = {"123", "test"};
-    mystl::Vector<std::string>::Iterator it = vec.begin();
+    mystl::vector<std::string> vec = {"123", "test"};
+    mystl::vector<std::string>::iterator it = vec.begin();
 
     // 
     EXPECT_EQ(3, it->size());
@@ -141,12 +141,12 @@ TEST(VectorIteratorTest, Dereference) {
 /**
  * Test case: Iteratoin
  */
-TEST(VectorIteratorTest, Iteration) {
+TEST(vectorIteratorTest, Iteration) {
     // 
-    mystl::Vector<int> vec = {1, 2, 3, 4, 5};
+    mystl::vector<int> vec = {1, 2, 3, 4, 5};
     int i = 1;
 
-    for (mystl::Vector<int>::Iterator it = vec.begin(); it != vec.end(); ++it) {
+    for (mystl::vector<int>::iterator it = vec.begin(); it != vec.end(); ++it) {
         EXPECT_EQ(i++, *it);
     }
 }
@@ -155,10 +155,10 @@ TEST(VectorIteratorTest, Iteration) {
 /**
  * Test case: IncrementAndDecrement
  */
-TEST(VectorIteratorTest, IncrementAndDecrement) {
+TEST(vectorIteratorTest, IncrementAndDecrement) {
     // 
-    mystl::Vector<int> vec = {1, 2, 3};
-    mystl::Vector<int>::Iterator it = vec.begin();
+    mystl::vector<int> vec = {1, 2, 3};
+    mystl::vector<int>::iterator it = vec.begin();
 
     // 
     EXPECT_EQ(2, *(++it));
@@ -170,8 +170,8 @@ TEST(VectorIteratorTest, IncrementAndDecrement) {
 /**
  * Test case: EqualityAndInequality
  */
-TEST(VectorIteratorTest, EqualityAndInequality) {
-    mystl::Vector<int> vec = {1, 2};
+TEST(vectorIteratorTest, EqualityAndInequality) {
+    mystl::vector<int> vec = {1, 2};
     auto it1 = vec.begin();
     auto it2 = vec.begin();
     auto it3 = vec.end();

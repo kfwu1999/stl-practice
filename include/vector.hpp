@@ -105,6 +105,33 @@ public:
     {
     }
 
+
+    /**
+     * \brief Copy constructor
+     */
+    vector(const vector<value_type>& other)
+        : m_size(other.m_size), m_capacity(other.m_capacity), p_elem(nullptr)
+    {
+        if (other.p_elem != nullptr) {
+            p_elem = static_cast<pointer>(::operator new(m_capacity * sizeof(value_type)));
+            for (size_type i = 0; i < m_size; ++i)
+                new(&p_elem[i]) value_type(other.p_elem[i]);
+        }
+    }
+
+
+    /**
+     * \brief Move constructor
+     */
+    vector(vector<value_type>&& other)
+        : m_size(other.m_size), m_capacity(other.m_capacity), p_elem(other.p_elem)
+    {
+        other.m_size = 0;
+        other.m_capacity = 0;
+        other.p_elem = nullptr;
+    }
+
+
     /**
      * \brief Construct by initializer.
      */
@@ -117,6 +144,7 @@ public:
             new(&p_elem[i++]) value_type(elem);   // in-place construct
         }
     }
+
 
     /**
      * \brief Destructor for the vector.
@@ -137,17 +165,49 @@ public:
     const_reference operator[](size_type index) const { return p_elem[index]; }
 
     /**
+     * \brief Copy assign operator
      */
-    vector& operator=(const_reference other) {
-        if (this != other) {
+    vector& operator=(const vector& other) {
+        if (this != &other) {
+            // 
+            if (m_capacity < other.m_capacity) {
+                // old capaacity is not enough
+                clear();
+                destroyvector();
+                m_capacity = other.m_capacity;
+                p_elem = static_cast<value_type*>(::operator new(m_capacity * sizeof(value_type)));
+            }
+            else {
+                // reuse old memory space, clear without destroy
+                clear();
+            }
+
+            // 
+            m_size = other.m_size;
+            for (size_type i = 0; i < other.m_size; ++i) 
+                new(&p_elem[i]) value_type(other.p_elem[i]);
         }
         return *this;
     }
 
     /**
+     * \brief Move assign operator
      */
-    vector& operator=(value_type&& other) {
-        if (this != other) {
+    vector& operator=(vector&& other) {
+        if (this != &other) {
+            // clear and delete current elements
+            clear();
+            destroyvector();
+
+            // transfer ownership
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+            p_elem = other.p_elem;
+
+            // Reset the source object
+            other.m_size = 0;
+            other.m_capacity = 0;
+            other.p_elem = nullptr;
         }
         return *this;
     }
@@ -175,6 +235,12 @@ public:
             throw std::out_of_range("vector::at");
         return p_elem[pos];
     }
+
+    /**
+     * \brief Direct access to the underlying contiguous storage
+     */
+    pointer data() noexcept { return p_elem; }
+    const_pointer data() const noexcept { return p_elem; }
 
 
 /* Iterators */

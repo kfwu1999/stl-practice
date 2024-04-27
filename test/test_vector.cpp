@@ -16,6 +16,99 @@ TEST(vectorTest, DefaultConstructor) {
 
 
 /**
+ * Test Case: Initializer constructor
+ */
+TEST(vectorTest, InitializerConstructor) {
+    mystl::vector<int> vec = {1, 2, 3};
+    ASSERT_EQ(vec.size(), 3);
+    EXPECT_EQ(vec[0], 1);
+    EXPECT_EQ(vec[1], 2);
+    EXPECT_EQ(vec[2], 3);
+}
+
+
+/**
+ * Test Case: Copy constructor
+ */
+TEST(vectorTest, CopyConstructor) {
+    mystl::vector<int> original{1, 2, 3, 4, 5};
+    mystl::vector<int> copy = original;
+
+    ASSERT_EQ(copy.size(), original.size());
+    for (size_t i = 0; i < original.size(); ++i) {
+        EXPECT_EQ(copy[i], original[i]) << "Vectors differ at index " << i;
+    }
+}
+
+
+/**
+ * Test Case: Move constructor
+ */
+TEST(vectorTest, MoveConstructor) {
+    mystl::vector<int> original{1, 2, 3};
+    mystl::vector<int> moved = std::move(original);
+
+    ASSERT_EQ(moved.size(), 3);
+    EXPECT_EQ(original.size(), 0);
+    EXPECT_EQ(moved[0], 1);
+    EXPECT_EQ(moved[1], 2);
+    EXPECT_EQ(moved[2], 3);
+
+    // 
+    EXPECT_TRUE(original.empty());
+    EXPECT_EQ(original.capacity(), 0);
+}
+
+
+/**
+ * Test Case: CopyAssignment
+ */
+TEST(vectorTest, CopyAssignment) {
+    mystl::vector<int> original{1, 2, 3};
+    mystl::vector<int> copy;
+    copy = original;   // copy assignment
+
+    ASSERT_EQ(copy.size(), original.size());
+    for (size_t i = 0; i < original.size(); ++i) {
+        EXPECT_EQ(copy[i], original[i]) << "Copy assignment failed at index " << i;
+    }
+
+    // Modify copy and check original remains unchanged
+    copy[0] = 10;
+    EXPECT_EQ(original[0], 1) << "Original vector modified after copy assignment.";
+}
+
+
+/**
+ * Test Case: MoveAssignment
+ */
+TEST(vectorTest, MoveAssignment) {
+    mystl::vector<int> original{1, 2, 3};
+    mystl::vector<int> moved;
+    moved = std::move(original);   // move assignment
+
+    ASSERT_EQ(moved.size(), 3);
+    EXPECT_EQ(moved[0], 1);
+    EXPECT_EQ(moved[1], 2);
+    EXPECT_EQ(moved[2], 3);
+
+    // Ensure the original vector is in a valid empty state
+    EXPECT_TRUE(original.empty());
+    EXPECT_EQ(original.capacity(), 0);
+}
+
+
+/**
+ * Test Case: AtThrowsOutOfRange
+ */
+TEST(vectorTest, AtThrowsOutOfRange) {
+    mystl::vector<int> vec = {1, 2, 3};
+    EXPECT_EQ(vec.at(0), 1);
+    EXPECT_THROW(vec.at(3), std::out_of_range);
+}
+
+
+/**
  * Test Case: PushBackLValue
  */
 TEST(vectorTest, PushBackLValue) {

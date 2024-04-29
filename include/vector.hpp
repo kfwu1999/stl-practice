@@ -6,6 +6,8 @@
  *          url: https://youtu.be/ryRf4Jh_YC0?si=9gncPajBHf4uIz-T
  * - The Cherno: Writing an ITERATOR in C++
  *          url: https://youtu.be/F9eDv-YIOQ0?si=BHQ1Nyq6Jo0cUd1R
+ * - StackExchange: Basic iterator supporting vector implementation
+ *             url: https://codereview.stackexchange.com/questions/202157/basic-iterator-supporting-vector-implementation
  */
 
 #pragma once
@@ -18,55 +20,54 @@
 #include <new>              // ::operator new, ::operator delete
 #include <initializer_list> // initializer_list
 #include <stdexcept>        // out_of_range
+#include <iterator>         // random_access_iterator_tag
 
 
 namespace mystl {
 
 
 /**
- * \class VectorIterator
+ * \class vector_iterator
  */
 template <typename _vector>
-class VectorIterator {
+class vector_iterator {
 public:
-    using value_type      = typename _vector::value_type;
-    using pointer        = value_type*;
-    using reference      = value_type&;
+    using value_type        = typename _vector::value_type;
+    using pointer           = value_type*;
+    using reference         = value_type&;
+    using const_pointer     = const value_type*;
+    using const_reference   = const value_type&;
+    using difference_type   = std::ptrdiff_t;
+    using iterator_category = std::random_access_iterator_tag;   // C++ named requirements: LegacyRandomAccessIterator
 
 public:
-    VectorIterator(pointer ptr)
-        : p_ptr(ptr) {}
+    vector_iterator() : p_ptr(nullptr) {}
+    vector_iterator(pointer ptr) : p_ptr(ptr) {}
 
 public:
-    VectorIterator& operator++() {
-        p_ptr++;
-        return *this;
-    }
+    reference       operator*()                 { return *p_ptr; }
+    const_reference operator*()           const { return *p_ptr; }
+    pointer         operator->()                { return p_ptr; }
+    const_pointer   operator->()          const { return p_ptr; }
+    reference       operator[](int index)       { return *(p_ptr + index); }
+    const_reference operator[](int index) const { return *(p_ptr + index); }
 
-    VectorIterator& operator--() {
-        p_ptr--;
-        return *this;
-    }
+    vector_iterator& operator++()      { p_ptr++; return *this; }
+    vector_iterator& operator--()      { p_ptr--; return *this; }
+    vector_iterator& operator+=(int n) { p_ptr += n; return *this; }
+    vector_iterator& operator-=(int n) { p_ptr -= n; return *this; }
 
-    reference operator[](int index) {
-        return *(p_ptr + index);
-    }
+    vector_iterator operator+(int n) const { vector_iterator temp(*this); return temp += n; }
+    vector_iterator operator-(int n) const { vector_iterator temp(*this); return temp -= n; }
 
-    pointer operator->() {
-        return p_ptr;
-    }
+    difference_type operator-(const vector_iterator& other) const { return p_ptr - other.p_ptr; }
 
-    reference operator*() {
-        return *p_ptr;
-    }
-
-    bool operator==(const VectorIterator& other) const {
-        return p_ptr == other.p_ptr;
-    }
-
-    bool operator!=(const VectorIterator& other) const {
-        return p_ptr != other.p_ptr;
-    }
+    bool operator<(const vector_iterator& other)  const { return p_ptr <  other.p_ptr; }
+    bool operator<=(const vector_iterator& other) const { return p_ptr <= other.p_ptr; }
+    bool operator>(const vector_iterator& other)  const { return p_ptr >  other.p_ptr; }
+    bool operator>=(const vector_iterator& other) const { return p_ptr >= other.p_ptr; }
+    bool operator==(const vector_iterator& other) const { return p_ptr == other.p_ptr; }
+    bool operator!=(const vector_iterator& other) const { return p_ptr != other.p_ptr; }
 
 private:
     pointer p_ptr;
@@ -82,14 +83,15 @@ private:
 template <typename _T>
 class vector {
 public:
-    using value_type      = _T;
-    using size_type       = std::size_t;
-    using pointer         = _T*;
-    using reference       = _T&;
-    using const_pointer   = const _T*;
-    using const_reference = const _T&;
-    using iterator        = VectorIterator<vector<value_type>>;
-    using const_iterator  = const iterator;
+    using value_type       = _T;
+    using size_type        = std::size_t;
+    using pointer          = _T*;
+    using reference        = _T&;
+    using const_pointer    = const _T*;
+    using const_reference  = const _T&;
+    using iterator         = vector_iterator<vector<value_type>>;
+    using const_iterator   = vector_iterator<vector<const value_type>>;
+    using reverse_iterator = std::reverse_iterator<iterator>;
 
 private:
     static constexpr size_type DEFAULT_CAPACITY = 10;
@@ -248,13 +250,14 @@ public:
     /**
      */
     iterator begin() { return iterator(p_elem); }
-    const_iterator begin() const { return iterator(p_elem); }
-
+    const_iterator cbegin() const noexcept { return const_iterator(p_elem); }
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
 
     /**
      */
     iterator end() { return iterator(p_elem + m_size); }
-    const_iterator end() const { return iterator(p_elem + m_size); }
+    const_iterator cend() const noexcept { return const_iterator(p_elem + m_size); }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
 
 
 /* Capacity */

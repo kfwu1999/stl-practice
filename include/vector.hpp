@@ -137,7 +137,7 @@ public:
     /**
      * \brief Move constructor
      */
-    vector(vector<value_type>&& other)
+    vector(vector<value_type>&& other) noexcept
         : m_size(other.m_size), m_capacity(other.m_capacity), p_elem(other.p_elem)
     {
         other.m_size = 0;
@@ -207,7 +207,7 @@ public:
     /**
      * \brief Move assign operator
      */
-    vector& operator=(vector&& other) {
+    vector& operator=(vector&& other) noexcept {
         if (this != &other) {
             // clear and delete current elements
             clear();

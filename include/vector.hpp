@@ -312,6 +312,144 @@ public:
 /* Modifiers */
 public:
     /**
+     * \brief Clear all contents in vector.
+     *
+     * Invokes the destructor for each element in the vector, effectively
+     * destroying all contained objects and resetting the vector's size to 0.
+     */
+    void clear() {
+        for (size_type i = 0; i < m_size; ++i) {
+            p_elem[i].~value_type();
+        }
+        m_size = 0;
+    }
+
+
+    /**
+     * \brief Erases elements
+     *
+     * \param pos: iterator to the element to remove (use const_iterator since c++11)
+     *
+     * \return The element after the deleted element.
+     */
+    iterator erase(const_iterator pos) {
+        // 
+        if (pos < cbegin() || pos > cbegin())
+            throw std::out_of_range("vector::erase() - Iterator out of range");
+
+        // Convert const_iterator to iterator
+        difference_type dist = std::distance(cbegin(), pos);
+        iterator nonConstPos = begin() + dist;
+
+        // Move elements
+        iterator it;
+        for (it = nonConstPos; (it + 1) != end(); ++it) {
+            *it = std::move(*(it + 1));
+        }
+
+        // Destroy element
+        (it)->~value_type();
+        m_size--;
+
+        // 
+        return it;
+    }
+
+
+    /**
+     * \brief Erases elements
+     *
+     * \param first, last: range of elements to remove (use const_iterator since c++11)
+     *
+     * \return The element after the deleted element.
+     */
+    iterator erase(const_iterator first, const_iterator last) {
+        // 
+        if (first < cbegin() || last > cend())
+            throw std::out_of_range("vector::erase() - Iterator out of range");
+
+        // Convert const_iterator to iterator
+        difference_type dist2first = std::distance(cbegin(), first);
+        difference_type dist2last = std::distance(cbegin(), last);
+        iterator nonConstFirst = begin() + dist2first;
+        iterator nonConstLast = begin() + dist2last;
+
+        // 
+        if (first == last)
+            return nonConstLast;
+
+        // Move elements
+        iterator itLeft = nonConstFirst, itRight = nonConstLast;
+        while (itRight != end()) {
+            *itLeft = std::move(*itRight);
+            itLeft++;
+            itRight++;
+        }
+
+        // destroy elements
+        iterator newEnd = end() - (dist2last - dist2first);
+        while (itLeft != newEnd) {
+            (itLeft)->~value_type();
+            itLeft++;
+        }
+
+        // 
+        m_size -= (dist2last - dist2first);
+
+        return nonConstFirst;
+    }
+
+
+    /**
+     * \brief Construct a new element in-place before the pos
+     *
+     * \param pos: the new element will be constructed before pos
+     * \param args: arguments to forward to the constructor of the element
+     *
+     * \return iterator pointing to the emplaced element.
+     */
+    template <typename ...Args>
+    iterator emplace(const_iterator pos, Args&&... args) {
+        // check capacity
+        if (m_size >= m_capacity)
+            realloc(REALLOC_RATE * m_capacity);
+
+        // convert const_iterator to iterator
+        difference_type dist = std::distance(cbegin(), pos);
+        iterator nonConstPos = begin() + dist;
+
+        // shift elements after pos
+        if (nonConstPos != end()) {
+            for (iterator it = end(); it != nonConstPos; --it) {
+                *it = std::move(*(it-1));
+            }
+        }
+
+        // In-place construction
+        new(&(*nonConstPos)) value_type(std::forward<Args>(args)...);
+        ++m_size;
+
+        // 
+        return nonConstPos;
+    }
+
+
+    /**
+     * \brief inserts elements
+     *
+     * \param pos: the new element will be inserted before pos
+     * \param value: element value to insert
+     */
+    iterator insert(const_iterator pos, const_reference value) {
+        return emplace(pos, value);
+    }
+
+    iterator insert(const_iterator pos, value_type&& value) {
+        return emplace(pos, std::move(value));
+    }
+
+
+    /**
      * \brief Insert at the end of the vector.
      */
     void push_back(const_reference value) {
@@ -354,22 +492,51 @@ public:
         if (m_size > 0) {
             p_elem[--m_size].~value_type();
         }
+        else {
+            throw std::length_error("vector::pop_back(): the vector is empty");
+        }
     }
 
 
     /**
-     * \brief Clear all contents in vector.
+     * \brief Changes the number of elements stored
      *
-     * Invokes the destructor for each element in the vector, effectively
-     * destroying all contained objects and resetting the vector's size to 0.
+     * \param count: new size of the container
+     * \param value: the value to initialize the new elements with
      */
-    void clear() {
-        for (size_type i = 0; i < m_size; ++i) {
-            p_elem[i].~value_type();
+    void resize(size_type count, const_reference value) {
+        // 
+        if (m_size > count) {
+            erase(cbegin() + count, cend());
         }
-        m_size = 0;
+        else {
+            if (count > m_capacity) {
+                reserve(count);
+            }
+            for (size_type i = m_size; i < count; ++i) {
+                new(&p_elem[i]) value_type(value);
+            }
+        }
+
+        // 
+        m_size = count;
     }
 
+    void resize(size_type count) {
+        resize(count, value_type());
+    }
+
+
+    /**
+     * \brief swaps the contents
+     *
+     * \param other: other vector
+     */
+    void swap(vector& other) noexcept {
+        std::swap(this->m_size, other.m_size);
+        std::swap(this->m_capacity, other.m_capacity);
+        std::swap(this->p_elem, other.p_elem);
+    }
 
 private:
     /**
@@ -382,17 +549,16 @@ private:
         pointer newBlock = static_cast<pointer>(::operator new(newCapacity * sizeof(value_type)));
 
         // copy/move old elements into new block
-        if (newCapacity < m_size) {
-            m_size = newCapacity;
-        }
-
-        for (size_type i = 0; i < m_size; ++i) {
+        size_type elemNum = newCapacity > m_size ? m_size : newCapacity;
+        for (size_type i = 0; i < elemNum; ++i) {
             new(&newBlock[i]) value_type(std::move(p_elem[i]));
+            p_elem[i].~value_type();
         }
 
         // 
         destroy_vector();
         p_elem = newBlock;
+        m_size = elemNum;
         m_capacity = newCapacity;
     }
 
@@ -418,6 +584,12 @@ private:
 };
 
 
+/**
+ * \brief Specializes the std::swap algorithm for std::vector.
+ */
+template <typename T>
+void swap(vector<T>& lhs, vector<T>& rhs) noexcept {
+    lhs.swap(rhs);
 }
 
 

@@ -3,6 +3,7 @@
  */
 
 #include "vector.hpp"
+#include <stdexcept>
 #include <gtest/gtest.h>
 
 
@@ -109,6 +110,78 @@ TEST(vectorTest, AtThrowsOutOfRange) {
 
 
 /**
+ */
+TEST(vectorTest, Reserve) {
+    mystl::vector<int> vec;
+    vec.reserve(100);
+    EXPECT_EQ(vec.capacity(), 100);
+    EXPECT_EQ(vec.size(), 0) << "The size of vector changed after reserve";
+}
+
+
+/**
+ * Test Case: ShrinkToFit
+ */
+TEST(vectorTest, ShrinkToFit) {
+    mystl::vector<int> vec;
+    for (int i = 0; i < 100; ++i)
+        vec.push_back(i);
+    int valBefore = vec[99];
+    vec.shrink_to_fit();
+    int valAfter = vec[99];
+    ASSERT_EQ(vec.capacity(), 100);
+    EXPECT_EQ(vec.size(), 100) << "The size changed after shrink_to_fit";
+    EXPECT_EQ(valBefore, valAfter) << "The value of last element changed after shrink_to_fit";
+}
+
+
+/**
+ */
+TEST(vectorTest, Erase) {
+    // 
+    mystl::vector<int> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    vec.erase(vec.cbegin());
+    EXPECT_EQ(vec.size(), 9);
+    EXPECT_EQ(vec[0], 1);
+    EXPECT_THROW(vec.erase(vec.cbegin() - 1), std::out_of_range);
+
+    vec.erase(vec.cbegin() + 2, vec.cbegin() + 5);
+    EXPECT_EQ(vec.size(), 6);
+    EXPECT_EQ(vec[1], 2);
+    EXPECT_EQ(vec[2], 6);
+    EXPECT_THROW(vec.erase(vec.cbegin() + 2, vec.cbegin() + 10), std::out_of_range);
+}
+
+
+TEST(VectorTest, Emplace) {
+    mystl::vector<int> vec = {1, 2, 3, 5};
+    auto it = vec.emplace(vec.cbegin() + 3, 4);
+    EXPECT_EQ(*it, 4);
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec[3], 4);
+}
+
+
+TEST(VectorTest, Insert) {
+    mystl::vector<int> vec = {1, 2, 3, 5};
+
+    // Test using const_reference input
+    auto it = vec.insert(vec.cbegin() + 3, 4);
+    EXPECT_EQ(*it, 4);
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec[3], 4);
+
+    // Test using r value reference input
+    it = vec.insert(vec.cbegin() + 1, std::move(0));
+    EXPECT_EQ(*it, 0);
+    EXPECT_EQ(vec.size(), 6);
+    EXPECT_EQ(vec[1], 0);
+    EXPECT_EQ(vec[2], 2);
+}
+
+
+/**
  * Test Case: PushBackLValue
  */
 TEST(vectorTest, PushBackLValue) {
@@ -151,6 +224,65 @@ TEST(vectorTest, pop_back) {
     EXPECT_EQ(1, vec.size());
     vec.pop_back();
     EXPECT_EQ(true, vec.empty());
+    EXPECT_THROW(vec.pop_back(), std::length_error);
+}
+
+
+/**
+ */
+TEST(vectorTest, Resize) {
+    mystl::vector<int> vec;
+    for (std::size_t i = 0; i < 20; ++i)
+        vec.push_back(i);
+
+    vec.resize(25);
+    ASSERT_EQ(vec.size(), 25);
+    EXPECT_EQ(vec[24], 0) << "The value of appended default-inserted elements is wrong.";
+
+    vec.resize(30, 10);
+    ASSERT_EQ(vec.size(), 30);
+    EXPECT_EQ(vec[29], 10) << "The value of appended elements is wrong";
+
+    vec.resize(10);
+    ASSERT_EQ(vec.size(), 10);
+}
+
+
+/**
+ */
+TEST(VectorTest, SwapVectors) {
+    // 
+    mystl::vector<int> vec1 = {0, 1, 2, 3};
+    mystl::vector<int> vec2 = {4, 5, 6};
+
+    // Record original sizes and capacities
+    auto size1 = vec1.size();
+    auto size2 = vec2.size();
+    auto capacity1 = vec1.capacity();
+    auto capacity2 = vec2.capacity();
+
+    // Swap vectors
+    swap(vec1, vec2);
+
+    // Check sizes and capacities swapped
+    EXPECT_EQ(vec1.size(), size2);
+    EXPECT_EQ(vec2.size(), size1);
+    EXPECT_EQ(vec1.capacity(), capacity2);
+    EXPECT_EQ(vec2.capacity(), capacity1);
+
+    // Check contents swapped
+    EXPECT_EQ(vec1[0], 4);
+    EXPECT_EQ(vec1[1], 5);
+    EXPECT_EQ(vec1[2], 6);
+
+    EXPECT_EQ(vec2[0], 0);
+    EXPECT_EQ(vec2[1], 1);
+    EXPECT_EQ(vec2[2], 2);
+    EXPECT_EQ(vec2[3], 3);
+
+    // Ensure no excess elements
+    EXPECT_THROW(vec1.at(3), std::out_of_range);
+    EXPECT_THROW(vec2.at(4), std::out_of_range);
 }
 
 
@@ -282,27 +414,3 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
 }
 
-/**
- */
-TEST(vectorTest, Reserve) {
-    mystl::vector<int> vec;
-    vec.reserve(100);
-    EXPECT_EQ(vec.capacity(), 100);
-    EXPECT_EQ(vec.size(), 0) << "The size of vector changed after reserve";
-}
-
-
-/**
- * Test Case: ShrinkToFit
- */
-TEST(vectorTest, ShrinkToFit) {
-    mystl::vector<int> vec;
-    for (int i = 0; i < 100; ++i)
-        vec.push_back(i);
-    int valBefore = vec[99];
-    vec.shrink_to_fit();
-    int valAfter = vec[99];
-    ASSERT_EQ(vec.capacity(), 100);
-    EXPECT_EQ(vec.size(), 100) << "The size changed after shrink_to_fit";
-    EXPECT_EQ(valBefore, valAfter) << "The value of last element changed after shrink_to_fit";
-}

@@ -168,7 +168,7 @@ public:
      */
     ~vector() {
         clear();
-        destroyvector();
+        destroy_vector();
     }
 
 /* Operators */
@@ -187,7 +187,7 @@ public:
             if (m_capacity < other.m_capacity) {
                 // old capaacity is not enough
                 clear();
-                destroyvector();
+                destroy_vector();
                 m_capacity = other.m_capacity;
                 p_elem = static_cast<value_type*>(::operator new(m_capacity * sizeof(value_type)));
             }
@@ -211,7 +211,7 @@ public:
         if (this != &other) {
             // clear and delete current elements
             clear();
-            destroyvector();
+            destroy_vector();
 
             // transfer ownership
             m_size = other.m_size;
@@ -391,8 +391,7 @@ private:
         }
 
         // 
-        clear();
-        destroyvector();
+        destroy_vector();
         p_elem = newBlock;
         m_capacity = newCapacity;
     }
@@ -404,10 +403,13 @@ private:
      * Deallocate the memory block allocated for the vector's storage without
      * calling the contained elements' destructors.
      */
-    void destroyvector() {
-        // delete[] p_elem;
-        ::operator delete(p_elem);
+    void destroy_vector() {
+        clear();
+        ::operator delete[](p_elem);
+        p_elem = nullptr;
+        m_capacity = 0;
     }
+
 
 private:
     size_type m_size     = 0;

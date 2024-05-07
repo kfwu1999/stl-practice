@@ -291,6 +291,23 @@ public:
      */
     bool empty() const { return m_size == 0; }
 
+    /**
+     * \brief Reserves storage
+     */
+    void reserve(size_type newCapacity) {
+        if (m_capacity < newCapacity)
+            realloc(newCapacity);
+    }
+
+    /**
+     * \brief Reduces memory usage by freeing unused memory
+     */
+    void shrink_to_fit() {
+        if (m_capacity > m_size) {
+            realloc(m_size);
+        }
+    }
+
 
 /* Modifiers */
 public:
@@ -397,6 +414,9 @@ private:
     size_type m_capacity = 0;
     pointer   p_elem     = nullptr;
 };
+
+
+}
 
 
 }

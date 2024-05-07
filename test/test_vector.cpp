@@ -282,3 +282,27 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
 }
 
+/**
+ */
+TEST(vectorTest, Reserve) {
+    mystl::vector<int> vec;
+    vec.reserve(100);
+    EXPECT_EQ(vec.capacity(), 100);
+    EXPECT_EQ(vec.size(), 0) << "The size of vector changed after reserve";
+}
+
+
+/**
+ * Test Case: ShrinkToFit
+ */
+TEST(vectorTest, ShrinkToFit) {
+    mystl::vector<int> vec;
+    for (int i = 0; i < 100; ++i)
+        vec.push_back(i);
+    int valBefore = vec[99];
+    vec.shrink_to_fit();
+    int valAfter = vec[99];
+    ASSERT_EQ(vec.capacity(), 100);
+    EXPECT_EQ(vec.size(), 100) << "The size changed after shrink_to_fit";
+    EXPECT_EQ(valBefore, valAfter) << "The value of last element changed after shrink_to_fit";
+}

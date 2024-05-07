@@ -20,7 +20,7 @@
 #include <new>              // ::operator new, ::operator delete
 #include <initializer_list> // initializer_list
 #include <stdexcept>        // out_of_range
-#include <iterator>         // random_access_iterator_tag
+#include <iterator>         // random_access_iterator_tag, distance
 
 
 namespace mystl {
@@ -52,10 +52,20 @@ public:
     reference       operator[](int index)       { return *(p_ptr + index); }
     const_reference operator[](int index) const { return *(p_ptr + index); }
 
-    vector_iterator& operator++()      { p_ptr++; return *this; }
-    vector_iterator& operator--()      { p_ptr--; return *this; }
     vector_iterator& operator+=(int n) { p_ptr += n; return *this; }
     vector_iterator& operator-=(int n) { p_ptr -= n; return *this; }
+    vector_iterator& operator++()      { ++p_ptr; return *this; }
+    vector_iterator& operator--()      { --p_ptr; return *this; }
+    vector_iterator operator++(int) { 
+        vector_iterator old(*this);   // remember original value
+        ++(*this);                    // post-increment
+        return old;                   // return original value
+    }
+    vector_iterator operator--(int) { 
+        vector_iterator old(*this);   // remember original value
+        --(*this);                    // post-decrement
+        return old;                   // return original value
+    }
 
     vector_iterator operator+(int n) const { vector_iterator temp(*this); return temp += n; }
     vector_iterator operator-(int n) const { vector_iterator temp(*this); return temp -= n; }
@@ -83,15 +93,17 @@ private:
 template <typename _T>
 class vector {
 public:
-    using value_type       = _T;
-    using size_type        = std::size_t;
-    using pointer          = _T*;
-    using reference        = _T&;
-    using const_pointer    = const _T*;
-    using const_reference  = const _T&;
-    using iterator         = vector_iterator<vector<value_type>>;
-    using const_iterator   = vector_iterator<vector<const value_type>>;
-    using reverse_iterator = std::reverse_iterator<iterator>;
+    using value_type             = _T;
+    using size_type              = std::size_t;
+    using pointer                = _T*;
+    using reference              = _T&;
+    using const_pointer          = const _T*;
+    using const_reference        = const _T&;
+    using difference_type        = std::ptrdiff_t;
+    using iterator               = vector_iterator<vector<value_type>>;
+    using const_iterator         = vector_iterator<vector<const value_type>>;
+    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const iterator>;
 
 private:
     static constexpr size_type DEFAULT_CAPACITY = 10;
@@ -252,12 +264,14 @@ public:
     iterator begin() { return iterator(p_elem); }
     const_iterator cbegin() const noexcept { return const_iterator(p_elem); }
     reverse_iterator rbegin() { return reverse_iterator(end()); }
+    const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
 
     /**
      */
     iterator end() { return iterator(p_elem + m_size); }
     const_iterator cend() const noexcept { return const_iterator(p_elem + m_size); }
     reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
 
 
 /* Capacity */

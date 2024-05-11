@@ -17,6 +17,47 @@ TEST(vectorTest, DefaultConstructor) {
 
 
 /**
+ * Test Case: ConstructByCountOfCopies
+ */
+TEST(vectorTest, ConstructByCountOfCopies) {
+    // construct by given value
+    mystl::vector<int> vec(15, 1);
+    ASSERT_EQ(vec.size(), 15);
+    EXPECT_EQ(vec.capacity(), 15);
+    for (size_t i = 0; i < vec.size(); ++i) {
+        EXPECT_EQ(vec[i], 1);
+    }
+
+    // construct by default-constructed value_type
+    mystl::vector<int> vec2(15);
+    ASSERT_EQ(vec2.size(), 15);
+    EXPECT_EQ(vec2.capacity(), 15);
+    for (size_t i = 0; i < vec2.size(); ++i) {
+        EXPECT_EQ(vec2[i], 0);
+    }
+}
+
+
+/**
+ * Test Case: ConstructByRange
+ */
+TEST(vectorTest, ConstructByRange) {
+    int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    mystl::vector<int> vec(arr, arr + 10);
+    ASSERT_EQ(vec.size(), 10);
+    for (size_t i = 0; i < 10; ++i) {
+        EXPECT_EQ(vec[i], i) << "Vectors differ at index " << i;
+    }
+
+    mystl::vector<int> newVec(vec.begin(), vec.end());
+    ASSERT_EQ(newVec.size(), 10);
+    for (size_t i = 0; i < 10; ++i) {
+        EXPECT_EQ(newVec[i], i) << "Vectors differ at index " << i;
+    }
+}
+
+
+/**
  * Test Case: Copy constructor
  */
 TEST(vectorTest, CopyConstructor) {

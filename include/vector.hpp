@@ -21,6 +21,7 @@
 #include <initializer_list> // initializer_list
 #include <stdexcept>        // out_of_range
 #include <iterator>         // random_access_iterator_tag, distance
+#include <type_traits>      // enable_if, is_integral
 
 
 namespace mystl {
@@ -117,6 +118,42 @@ public:
         : m_size(0), m_capacity(DEFAULT_CAPACITY), 
           p_elem(static_cast<pointer>(::operator new(DEFAULT_CAPACITY * sizeof(value_type))))
     {
+    }
+
+
+    /**
+     * \brief Constructs the container with count copies of elements with value. 
+     *
+     * If `value` is not specified, the elements will initializ to their default-constructed values.
+     *
+     * \param count: The number of elements to construct.
+     * \param value: The value to initialize the elements, default is a default-constructed of value_type.
+     */
+    explicit vector(size_type count, const_reference value = value_type()) {
+        resize(count, value);
+    }
+
+
+    /**
+     * \brief Constructs the container with the contents of the range [first,
+     * last).
+     *
+     * \note Enabled only if InputIt is an iterator. (using SFINAE)
+     *
+     * \param first, last: iterators defining the range to be copied into the
+     * vector, the `first` must be smaller than `last`
+     */
+    template <typename InputIt, 
+              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    vector(InputIt first, InputIt last)
+        : m_size(last - first),
+          m_capacity(m_size),
+          p_elem(static_cast<pointer>(::operator new(m_capacity * sizeof(value_type))))
+    {
+        size_type i = 0;
+        for (InputIt it = first; it != last; ++it, ++i) {
+            new(&p_elem[i]) value_type(*it);
+        }
     }
 
 

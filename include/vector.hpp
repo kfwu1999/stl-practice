@@ -410,27 +410,25 @@ public:
      */
     template <typename ...Args>
     iterator emplace(const_iterator pos, Args&&... args) {
+        // calculate the `tarIndex` first because the iterator `pos` will be invalidate after using `realloc`
+        size_type tarIndex = pos - cbegin();
+
         // check capacity
         if (m_size >= m_capacity)
             realloc(REALLOC_RATE * m_capacity);
 
-        // convert const_iterator to iterator
-        difference_type dist = std::distance(cbegin(), pos);
-        iterator nonConstPos = begin() + dist;
-
         // shift elements after pos
-        if (nonConstPos != end()) {
-            for (iterator it = end(); it != nonConstPos; --it) {
-                *it = std::move(*(it-1));
-            }
+        for (size_type i = m_size; i > tarIndex; --i) {
+            new(&p_elem[i]) value_type(std::move(p_elem[i-1]));
+            p_elem[i-1].~value_type();
         }
 
-        // In-place construction
-        new(&(*nonConstPos)) value_type(std::forward<Args>(args)...);
+        // in-place construct
+        new(&p_elem[tarIndex]) value_type(std::forward<Args>(args)...);
         ++m_size;
 
         // 
-        return nonConstPos;
+        return iterator(begin() + tarIndex);
     }
 
 

@@ -155,11 +155,25 @@ TEST(vectorTest, Erase) {
 
 
 TEST(VectorTest, Emplace) {
-    mystl::vector<int> vec = {1, 2, 3, 5};
-    auto it = vec.emplace(vec.cbegin() + 3, 4);
-    EXPECT_EQ(*it, 4);
+    mystl::vector<int> vec = {1, 2, 4, 5};
+
+    // emplace at first
+    auto it = vec.emplace(vec.cbegin(), 0);
+    EXPECT_EQ(*it, 0);
     EXPECT_EQ(vec.size(), 5);
-    EXPECT_EQ(vec[3], 4);
+    EXPECT_EQ(vec[0], 0);
+
+    // emplace at middle
+    it = vec.emplace(vec.cbegin() + 3, 3);
+    EXPECT_EQ(*it, 3);
+    EXPECT_EQ(vec.size(), 6);
+    EXPECT_EQ(vec[3], 3);
+
+    // emplace at end
+    it = vec.emplace(vec.cend(), 6);
+    EXPECT_EQ(*it, 6);
+    EXPECT_EQ(vec.size(), 7);
+    EXPECT_EQ(vec[6], 6);
 }
 
 
@@ -167,17 +181,22 @@ TEST(VectorTest, Insert) {
     mystl::vector<int> vec = {1, 2, 3, 5};
 
     // Test using const_reference input
-    auto it = vec.insert(vec.cbegin() + 3, 4);
-    EXPECT_EQ(*it, 4);
-    EXPECT_EQ(vec.size(), 5);
-    EXPECT_EQ(vec[3], 4);
-
-    // Test using r value reference input
-    it = vec.insert(vec.cbegin() + 1, std::move(0));
+    auto it = vec.insert(vec.cbegin(), 0);
     EXPECT_EQ(*it, 0);
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec[0], 0);
+
+    // insert at middle
+    it = vec.insert(vec.cbegin() + 3, 3);
+    EXPECT_EQ(*it, 3);
     EXPECT_EQ(vec.size(), 6);
-    EXPECT_EQ(vec[1], 0);
-    EXPECT_EQ(vec[2], 2);
+    EXPECT_EQ(vec[3], 3);
+
+    // insert at end
+    it = vec.insert(vec.cend(), 6);
+    EXPECT_EQ(*it, 6);
+    EXPECT_EQ(vec.size(), 7);
+    EXPECT_EQ(vec[6], 6);
 }
 
 

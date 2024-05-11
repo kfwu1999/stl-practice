@@ -150,8 +150,8 @@ public:
      * \brief Construct by initializer.
      */
     vector(std::initializer_list<value_type> initList) 
-        : m_size(initList.size()), m_capacity(DEFAULT_CAPACITY), 
-          p_elem(static_cast<pointer>(::operator new(DEFAULT_CAPACITY * sizeof(value_type))))
+        : m_size(initList.size()), m_capacity(m_size),
+          p_elem(static_cast<pointer>(::operator new(m_size * sizeof(value_type))))
     {
         size_type i = 0;
         for (auto& elem : initList) {

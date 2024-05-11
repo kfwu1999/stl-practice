@@ -17,18 +17,6 @@ TEST(vectorTest, DefaultConstructor) {
 
 
 /**
- * Test Case: Initializer constructor
- */
-TEST(vectorTest, InitializerConstructor) {
-    mystl::vector<int> vec = {1, 2, 3};
-    ASSERT_EQ(vec.size(), 3);
-    EXPECT_EQ(vec[0], 1);
-    EXPECT_EQ(vec[1], 2);
-    EXPECT_EQ(vec[2], 3);
-}
-
-
-/**
  * Test Case: Copy constructor
  */
 TEST(vectorTest, CopyConstructor) {
@@ -58,6 +46,19 @@ TEST(vectorTest, MoveConstructor) {
     // 
     EXPECT_TRUE(original.empty());
     EXPECT_EQ(original.capacity(), 0);
+}
+
+
+/**
+ * Test Case: Initializer constructor
+ */
+TEST(vectorTest, InitializerConstructor) {
+    mystl::vector<int> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    ASSERT_EQ(vec.size(), 11);
+    EXPECT_EQ(vec.capacity(), 11);
+    EXPECT_EQ(vec[0], 0);
+    EXPECT_EQ(vec[1], 1);
+    EXPECT_EQ(vec[2], 2);
 }
 
 

@@ -109,16 +109,16 @@ public:
 public:
     /**
      */
-    iterator begin() noexcept { return iterator(data()); }
-    const_iterator cbegin() const noexcept { return const_iterator(data()); }
-    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    iterator                 begin()       noexcept { return iterator(data()); }
+    const_iterator          cbegin() const noexcept { return const_iterator(data()); }
+    reverse_iterator        rbegin()       noexcept { return reverse_iterator(end()); }
     const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
 
     /**
      */
-    iterator end() noexcept { return iterator(data() + _Size); }
-    const_iterator cend() const noexcept { return const_iterator(data() + _Size); }
-    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    iterator                 end()       noexcept { return iterator(data() + _Size); }
+    const_iterator          cend() const noexcept { return const_iterator(data() + _Size); }
+    reverse_iterator        rend()       noexcept { return reverse_iterator(begin()); }
     const_reverse_iterator crend() const noexcept { return const_reverse_iterator(cbegin()); }
 
 

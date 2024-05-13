@@ -196,7 +196,7 @@ TEST(vectorTest, Erase) {
 }
 
 
-TEST(VectorTest, Emplace) {
+TEST(vectorTest, Emplace) {
     mystl::vector<int> vec = {1, 2, 4, 5};
 
     // emplace at first
@@ -219,7 +219,7 @@ TEST(VectorTest, Emplace) {
 }
 
 
-TEST(VectorTest, Insert) {
+TEST(vectorTest, Insert) {
     mystl::vector<int> vec = {1, 2, 3, 5};
 
     // Test using const_reference input
@@ -311,7 +311,7 @@ TEST(vectorTest, Resize) {
 
 /**
  */
-TEST(VectorTest, SwapVectors) {
+TEST(vectorTest, SwapVectors) {
     // 
     mystl::vector<int> vec1 = {0, 1, 2, 3};
     mystl::vector<int> vec2 = {4, 5, 6};
@@ -466,6 +466,30 @@ TEST(vectorIteratorTest, EqualityAndInequality) {
     EXPECT_FALSE(it1 != it2);
     EXPECT_TRUE(it1 != it3);
     EXPECT_FALSE(it1 == it3);
+}
+
+
+/**
+ * Test Case: ReverseIterators
+ */
+TEST(vectorIteratorTest, ReverseIterators) {
+    mystl::vector<int> vec = {1, 2, 3, 4, 5};
+    int i = 5;
+    for (auto it = vec.rbegin(); it != vec.rend(); ++it, --i) {
+        EXPECT_EQ(*it, i);
+    }
+}
+
+
+/**
+ * Test Case: ConstReverseIterators
+ */
+TEST(vectorIteratorTest, ConstReverseIterators) {
+    const mystl::vector<int> vec = {1, 2, 3, 4, 5};
+    int i = 5;
+    for (auto it = vec.crbegin(); it != vec.crend(); ++it, --i) {
+        EXPECT_EQ(*it, i);
+    }
 }
 
 

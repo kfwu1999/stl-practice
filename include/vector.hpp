@@ -104,7 +104,7 @@ public:
     using iterator               = vector_iterator<vector<value_type>>;
     using const_iterator         = vector_iterator<vector<const value_type>>;
     using reverse_iterator       = std::reverse_iterator<iterator>;
-    using const_reverse_iterator = std::reverse_iterator<const iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
     static constexpr size_type DEFAULT_CAPACITY = 10;
@@ -301,14 +301,14 @@ public:
     iterator begin() { return iterator(p_elem); }
     const_iterator cbegin() const noexcept { return const_iterator(p_elem); }
     reverse_iterator rbegin() { return reverse_iterator(end()); }
-    const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
+    const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
 
     /**
      */
     iterator end() { return iterator(p_elem + m_size); }
     const_iterator cend() const noexcept { return const_iterator(p_elem + m_size); }
     reverse_iterator rend() { return reverse_iterator(begin()); }
-    const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
+    const_reverse_iterator crend() const noexcept { return const_reverse_iterator(cbegin()); }
 
 
 /* Capacity */

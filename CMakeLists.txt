@@ -28,9 +28,12 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 #
 add_executable(test_vector test/test_vector.cpp)
+add_executable(test_array test/test_array.cpp)
 
 #
 target_link_libraries(test_vector GTest::GTest GTest::Main)
+target_link_libraries(test_array GTest::GTest GTest::Main)
 
 #
 add_test(NAME test_vector COMMAND test_vector)
+add_test(NAME test_array COMMAND test_array)

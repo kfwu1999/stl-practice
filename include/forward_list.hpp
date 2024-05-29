@@ -195,19 +195,59 @@ public:
     /**
      * Copy assignment operator
      */
-    // TODO:
-    forward_list& operator=(const forward_list& other);
+    forward_list& operator=(const forward_list& other) {
+        if (this != &other) {
+            // 
+            clear();
+            m_size = 0;
+
+            // 
+            node_pointer curr = p_before_head;
+
+            // 
+            for (node_pointer other_curr = other.p_before_head->next;
+                    other_curr != nullptr; other_curr = other_curr->next)
+            {
+                curr->next = new node(other_curr->data);
+                curr = curr->next;
+                ++m_size;
+            }
+        }
+
+        // 
+        return *this;
+    }
 
     /**
      * Move assignment operator
      */
-    // TODO:
-    forward_list& operator=(forward_list&& other) noexcept;
+    forward_list& operator=(forward_list&& other) noexcept {
+        if (this != &other) {
+            swap(other);
+        }
+
+        // 
+        return *this;
+    }
 
     /**
      */
-    // TODO:
-    forward_list& operator=(std::initializer_list<value_type> ilist);
+    forward_list& operator=(std::initializer_list<value_type> initList) {
+        // 
+        clear();
+        m_size = 0;
+
+        // 
+        node_pointer curr = p_before_head;
+        for (auto& elem : initList) {
+            curr->next = new node(elem);
+            curr = curr->next;
+            ++m_size;
+        }
+
+        // 
+        return *this;
+    }
 
 
 /* Element access */

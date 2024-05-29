@@ -57,6 +57,35 @@ TEST(ForwardListTest, InitializerConstructor) {
 }
 
 
+/* Operators */
+TEST(ForwardListTest, AssignmentOperators) {
+    // Copy assignment
+    mystl::forward_list<int> list1 = {1, 2, 3};
+    mystl::forward_list<int> list2;
+    list2 = list1;
+    EXPECT_EQ(list1.size(), list2.size());
+    EXPECT_EQ(list1.front(), list2.front());
+
+    // the nodes in two list should be independent
+    for (auto it = list1.begin(), it2 = list2.begin(); it != list1.end(); ++it, ++it2) {
+        *it += 1;
+        EXPECT_NE(*it, *it2);
+    }
+
+    // Move assignment
+    mystl::forward_list<int> list3 = {1, 2, 3};
+    mystl::forward_list<int> list4;
+    list4 = std::move(list3);
+    EXPECT_EQ(3, list4.size());
+
+    // Assignment from initializer list
+    mystl::forward_list<int> list5;
+    list5 = {7, 8, 9};
+    EXPECT_EQ(3, list5.size());
+    EXPECT_EQ(7, list5.front());
+}
+
+
 TEST(ForwardListTest, Front) {
     // 
     mystl::forward_list<int> list;

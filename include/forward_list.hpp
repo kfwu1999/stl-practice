@@ -238,7 +238,17 @@ public:
      */
     forward_list& operator=(forward_list&& other) noexcept {
         if (this != &other) {
-            swap(other);
+            // 
+            clear();
+            delete p_before_head;
+
+            // 
+            m_size = other.m_size;
+            p_before_head = std::move(other.p_before_head);
+
+            // 
+            other.m_size = 0;
+            other.p_before_head = new node;   // reset other.p_before_head to a valid empty state
         }
 
         // 

@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <gtest/gtest.h>
 #include <utility>
+#include "vector.hpp"
 #include "forward_list.hpp"
 
 
@@ -11,6 +12,34 @@
 TEST(ForwardListTest, DefaultConstructorAndDestructor) {
     mystl::forward_list<int> list;
     EXPECT_EQ(list.size(), 0);
+}
+
+
+TEST(ForwardListTest, ConstructorWithCount) {
+    // 
+    mystl::forward_list<int> list(5, 1);
+
+    // 
+    EXPECT_EQ(list.size(), 5);
+    for (auto it = list.cbegin(); it != list.cend(); ++it) {
+        EXPECT_EQ(*it, 1);
+    }
+}
+
+
+TEST(ForwardListTest, ConstructorWithRange) {
+    // 
+    mystl::vector<int> vec = {1, 2, 3, 4, 5};
+
+    // 
+    mystl::forward_list<int> list(vec.begin(), vec.end());
+
+    // 
+    EXPECT_EQ(list.size(), vec.size());
+    auto vec_it = vec.begin();
+    for (auto it = list.cbegin(); it != list.cend(); ++it, ++vec_it) {
+        EXPECT_EQ(*it, *vec_it);
+    }
 }
 
 
@@ -168,6 +197,39 @@ TEST(ForwardListTest, InsertAfterWithCount) {
     while (!list.empty()) {
         EXPECT_EQ(list.front(), 1);
         list.pop_front();
+    }
+}
+
+
+TEST(ForwardListTest, InsertAfterRange) {
+    // 
+    mystl::forward_list<int> list = {1, 2, 3};
+
+    // 
+    mystl::vector<int> range = {4, 5, 6};
+    list.insert_after(list.cbegin(), range.begin(), range.end());
+
+    // 
+    std::vector<int> expected = {1, 4, 5, 6, 2, 3};
+    int i = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it, ++i) {
+        EXPECT_EQ(*it, expected[i]);
+    }
+}
+
+
+TEST(ForwardListTest, InsertAfterInitializerList) {
+    // 
+    mystl::forward_list<int> list = {1, 2, 3};
+
+    // 
+    list.insert_after(list.cbegin(), {4, 5, 6});
+
+    // 
+    mystl::vector<int> expected = {1, 4, 5, 6, 2, 3};
+    int i = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it, ++i) {
+        EXPECT_EQ(*it, expected[i]);
     }
 }
 

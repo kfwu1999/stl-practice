@@ -139,6 +139,26 @@ public:
     }
 
     /**
+     * \brief Constructs the container with count copies of elements with value value.
+     */
+    explicit forward_list(size_type count, const_reference value = value_type())
+        : m_size(0), p_before_head(new node)
+    {
+        insert_after(cbefore_begin(), count, value);
+    }
+
+    /**
+     * \brief Constructs the container with the contents of the range `[first, last)`.
+     */
+    template <typename InputIt,
+              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    forward_list(InputIt first, InputIt last)
+        : m_size(0), p_before_head(new node)
+    {
+        insert_after(cbefore_begin(), first, last);
+    }
+
+    /**
      * Copy constructor
      */
     forward_list(const forward_list& other) 
@@ -173,12 +193,7 @@ public:
     forward_list(std::initializer_list<value_type> initList) 
         : m_size(0), p_before_head(new node)
     {
-        node_pointer curr = p_before_head;
-        for (auto& elem : initList) {
-            curr->next = new node(elem);
-            curr = curr->next;
-            ++m_size;
-        }
+        insert_after(cbefore_begin(), initList);
     }
 
     /**
@@ -377,13 +392,20 @@ public:
     }
 
 
-    // TODO: 
     template <typename InputIt,
               typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
-    iterator insert_after(const_iterator pos, InputIt first, InputIt last);
+    iterator insert_after(const_iterator pos, InputIt first, InputIt last) {
+        iterator nonConstPos = iterator(pos.get_node());
+        for (auto it = first; it != last; ++it) {
+            nonConstPos = insert_after(const_iterator(nonConstPos.get_node()), *it);
+        }
+        return nonConstPos;
+    }
 
-    // TODO: 
-    iterator insert_after(const_iterator pos, std::initializer_list<value_type> iList);
+
+    iterator insert_after(const_iterator pos, std::initializer_list<value_type> iList) {
+        return insert_after(pos, iList.begin(), iList.end());
+    }
 
 
     /**

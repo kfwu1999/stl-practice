@@ -173,6 +173,8 @@ TEST(ForwardListIteratorTest, IterationByConst) {
 TEST(ForwardListTest, InsertAfter) {
     // 
     mystl::forward_list<int> list;
+
+    // 
     EXPECT_THROW(list.insert_after(list.cbegin(), 1), std::logic_error);
     list.push_front(1);
 
@@ -190,8 +192,17 @@ TEST(ForwardListTest, InsertAfter) {
 
 
 TEST(ForwardListTest, InsertAfterWithCount) {
+    // 
     mystl::forward_list<int> list;
+
+    // 
     EXPECT_THROW(list.insert_after(list.cbegin(), 1, 0), std::logic_error);
+
+    // insert with `0` count
+    list.insert_after(list.cbefore_begin(), 0, 1);
+    EXPECT_EQ(list.size(), 0);
+
+    // 
     list.insert_after(list.cbefore_begin(), 3, 1);
     EXPECT_EQ(list.size(), 3);
     while (!list.empty()) {
@@ -390,6 +401,86 @@ TEST(ForwardListTest, Swap) {
 
 
 /* Operations */
+TEST(ForwardListTest, Merge) {
+    // 
+    mystl::forward_list<int> list1 = {1, 3, 5};
+    mystl::forward_list<int> list2 = {2, 4, 6};
+
+    // 
+    list1.merge(list2);
+
+    // 
+    EXPECT_EQ(list1.size(), 6);
+
+    // 
+    std::vector<int> expected = {1, 2, 3, 4, 5, 6};
+    int i = 0;
+    for (auto value : list1) {
+        EXPECT_EQ(value, expected[i++]);
+    }
+
+    // 
+    EXPECT_TRUE(list2.empty());
+    EXPECT_EQ(list2.size(), 0);
+}
+
+
+TEST(ForwardListTest, SpliceAfter) {
+    // 
+    mystl::forward_list<int> list1 = {1, 2, 3};
+    mystl::forward_list<int> list2 = {4, 5, 6};
+
+    // 
+    auto it = list1.cbegin();
+    std::advance(it, 1);
+    list1.splice_after(it, list2);
+
+    // 
+    std::vector<int> expected = {1, 2, 4, 5, 6, 3};
+    int i = 0;
+    for (auto value : list1) {
+        EXPECT_EQ(value, expected[i++]);
+    }
+
+    // 
+    EXPECT_TRUE(list2.empty());
+    EXPECT_EQ(list2.size(), 0);
+}
+
+
+TEST(ForwardListTest, Unique) {
+    // 
+    mystl::forward_list<int> list = {1, 1, 2, 2, 3, 3, 3, 4, 4, 5};
+
+    // 
+    list.unique();
+
+    // 
+    std::vector<int> expected = {1, 2, 3, 4, 5};
+    int i = 0;
+    for (auto value : list) {
+        EXPECT_EQ(value, expected[i++]);
+    }
+    EXPECT_EQ(list.size(), expected.size());
+}
+
+
+TEST(ForwardListTest, Sort) {
+    // 
+    mystl::forward_list<int> list = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
+    std::size_t size_before_sort = list.size();
+    list.sort();
+
+    // 
+    std::vector<int> sorted = {1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9};
+    int i = 0;
+    for (auto value : list) {
+        EXPECT_EQ(value, sorted[i++]);
+    }
+
+    // 
+    EXPECT_EQ(list.size(), size_before_sort);
+}
 
 
 /**/

@@ -61,8 +61,8 @@ private:
 
         /**
          */
-        _T    data = _T();      // default-inserted value
-        node* next = nullptr;
+        value_type   data = value_type();      // default-inserted value
+        node_pointer next = nullptr;
     };
 
 
@@ -318,7 +318,7 @@ public:
      * \brief Checks whether the container is empty
      * \ref cppreference.com
      */
-    bool empty() const noexcept { return m_size == 0; }
+    bool empty() const noexcept { return p_before_head->next == nullptr; }
 
     /**
      * \brief Return the number of elements.
@@ -555,6 +555,248 @@ public:
     }
 
 
+/* Operations */
+public:
+    /**
+     * \brief Merge two sorted list
+     *
+     * \param other: another comtainer to merge
+     *
+     * \note No iterators or references become invalidated.
+     * \note Undefined behavior if the `this` or `other` is not sorted
+     */
+    void merge(forward_list& other) {
+        // This function does nothing if `other` refers to the same object as `this`
+        if (this == &other)
+            return;
+
+        // 
+        node_pointer dummy = new node;
+        node_pointer tail = dummy;
+        node_pointer curr1 = p_before_head->next;
+        node_pointer curr2 = other.p_before_head->next;
+
+        // 
+        while (curr1 != nullptr && curr2 != nullptr) {
+            if (curr1->data < curr2->data) {
+                tail->next = curr1;
+                curr1 = curr1->next;
+            } else {
+                tail->next = curr2;
+                curr2 = curr2->next;
+            }
+            tail = tail->next;
+        }
+
+        // 
+        if (curr1 != nullptr)
+            tail->next = curr1;
+        if (curr2 != nullptr)
+            tail->next = curr2;
+
+        // 
+        p_before_head->next = dummy->next;
+        m_size += other.m_size;
+
+        other.p_before_head->next = nullptr;
+        other.m_size = 0;
+
+        delete dummy;
+    }
+
+
+    /**
+     * \brief Move elements from another forward_list
+     *
+     * Moves elements from antoher forward_list to `this`. 
+     *
+     * \param pos: element after which the content will be inserted.
+     * \param other: anothe rcontainer to move the content from
+     *
+     * \note No iterators or references become invalidated.
+     */
+    void splice_after(const_iterator pos, forward_list& other) {
+        // 
+        if (pos == cbefore_begin() || pos == cend())
+            throw std::logic_error("splice_after(): Attempting to splice after end or before_begin.");
+
+        // 
+        node_pointer pos_ptr = pos.get_node();
+
+        // 
+        if (pos_ptr->next != nullptr) {
+            // Find the last node in the other list
+            node_pointer other_tail = other.p_before_head->next;
+            while (other_tail->next != nullptr)
+                other_tail = other_tail->next;
+            other_tail->next = pos_ptr->next;
+        }
+
+        // 
+        pos_ptr->next = other.p_before_head->next;
+        m_size += other.m_size;
+
+        // 
+        other.p_before_head->next = nullptr;
+        other.m_size = 0;
+    }
+
+
+    /**
+     * \brief Removes elements satisfying specific criteria
+     *
+     * \param value: valud of the elements to remove
+     */
+    void remove(const_reference value) {
+        // 
+        node_pointer prev = p_before_head;
+        node_pointer curr = p_before_head->next;
+
+        // 
+        while (curr != nullptr) {
+            if (curr->data == value) {
+                prev->next = curr->next;
+                delete curr;
+                curr = prev->next;
+                --m_size;
+            } else {
+                prev = curr;
+                curr = curr->next;
+            }
+        }
+    }
+
+    /**
+     * \brief Reverse the order of the elements
+     */
+    void reverse() noexcept {
+        // 
+        node_pointer prev = nullptr;
+        node_pointer curr = p_before_head->next;
+        node_pointer next = nullptr;
+
+        // 
+        while (curr != nullptr) {
+            next = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = next;
+        }
+
+        // 
+        p_before_head->next = prev;
+    }
+
+    /**
+     * \brief Removes consecutive duplicate elements
+     */
+    void unique() {
+        // 
+        node_pointer prev = p_before_head;
+        node_pointer curr = p_before_head->next;
+
+        // 
+        while (curr != nullptr) {
+            // skip at beginning because the `data` of `prev` is undefined
+            if (prev != p_before_head && prev->data == curr->data) {
+                prev->next = curr->next;
+                delete curr;
+                curr = prev->next;
+                --m_size;
+            } else {
+                prev = curr;
+                curr = curr->next;
+            }
+        }
+    }
+
+    /**
+     * \brief Sorts the elements
+     *
+     * \note use merge sort
+     */
+    void sort() {
+        p_before_head->next = merge_sort(p_before_head->next);
+    }
+
+
+private:
+    /**
+     * \brief Merge sort
+     */
+    node_pointer merge_sort(node_pointer head) {
+        // 
+        if (head == nullptr || head->next == nullptr)
+            return head;
+
+        //
+        node_pointer mid = get_middle_node(head);
+        node_pointer mid_next = mid->next;
+        mid->next = nullptr;
+
+        // 
+        node_pointer left_part = merge_sort(head);
+        node_pointer right_part = merge_sort(mid_next);
+
+        return merge(left_part, right_part);
+    }
+
+
+    /**
+     * \brief Get middle node for merge sort
+     */
+    node_pointer get_middle_node(node_pointer head) {
+        // 
+        node_pointer fast = head;
+        node_pointer slow = head;
+
+        // 
+        while (fast->next != nullptr && fast->next->next != nullptr) {
+            fast = fast->next->next;
+            slow = slow->next;
+        }
+
+        return slow;
+    }
+
+
+    /**
+     * \brief merge for merge_sort
+     *
+     * \param head1: head of sorted list 1
+     * \param head2: head of sorted list 2
+     */
+    node_pointer merge(node_pointer head1, node_pointer head2) {
+        // 
+        node_pointer dummy = new node;
+        node_pointer tail = dummy;
+
+        // 
+        while (head1 != nullptr && head2 != nullptr) {
+            if (head1->data < head2->data) {
+                tail->next = head1;
+                head1 = head1->next;
+            } else {
+                tail->next = head2;
+                head2 = head2->next;
+            }
+            tail = tail->next;
+        }
+
+        // 
+        if (head1 != nullptr)
+            tail->next = head1;
+        if (head2 != nullptr)
+            tail->next = head2;
+
+        // 
+        node_pointer head = dummy->next;
+        delete dummy;
+
+        return head;
+    }
+
+
 private:
     size_type m_size;
     node*     p_before_head;   // sentinel node
@@ -568,6 +810,7 @@ template <typename T>
 void swap(forward_list<T>& lhs, forward_list<T>& rhs) {
     lhs.swap(rhs);
 }
+
 
 
 }

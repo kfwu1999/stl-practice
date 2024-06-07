@@ -331,7 +331,7 @@ public:
     /**
      * \brief Checks whether the container is empty
      */
-    bool empty() const noexcept { return p_end == p_end; }
+    bool empty() const noexcept { return p_end->next == p_end; }
 
 
 /* Iterators */
@@ -735,42 +735,194 @@ public:
 /* Operations */
 public:
     /**
-     * TODO:
+     * \brief Merge two sorted list
+     *
+     * \note No iterators or references become invalidated.
+     * \note Undefined behavior if the `this` or `other` is not sorted
      */
-    void merge(list& other);
-    void merge(list&& other);
+    void merge(list& other) {
+        // This function does nothing if `other` refers to the same object as `this`
+        if (this == &other)
+            return;
+
+        // 
+        node_pointer curr1 = p_end->next;
+        node_pointer curr2 = other.p_end->next;
+        node_pointer tail = p_end;
+
+        // 
+        while (curr1 != p_end && curr2 != other.p_end) {
+            if (curr1->data < curr2->data) {
+                tail = curr1;
+                curr1 = curr1->next;
+            }
+            else {
+                // 
+                node_pointer next = curr2->next;
+
+                // insert
+                tail->next = curr2;
+                curr2->prev = tail;
+                curr2->next = curr1;
+                curr1->prev = curr2;
+
+                // traverse
+                curr2 = next;
+                next->prev = other.p_end;
+
+                // update tail
+                tail = tail->next;
+            }
+        }
+
+        // remaining node
+        if (curr2 != other.p_end) {
+            // 
+            tail->next = curr2;
+            curr2->prev = tail;
+
+            // 
+            node_pointer otherTail = other.p_end->prev;
+            otherTail->next = p_end;
+            p_end->prev = otherTail;        
+        }
+
+        // 
+        m_size += other.m_size;
+
+        // 
+        other.m_size = 0;
+        other.init_sentinel_node();
+    }
+
 
     /**
+     * \brief Moves elements from another list
+     *
+     * \param pos: element after which the content will be inserted.
+     * \param other: anothe rcontainer to move the content from
+     *
+     * \note No iterators or references become invalidated.
      */
-    // TODO:
-    void splice(const_iterator pos, list& other);
-    void splice(const_iterator pos, list&& other);
+    void splice(const_iterator pos, list& other) {
+        // 
+        if (other.m_size == 0) 
+            return;
+
+        node_pointer curr = pos.get_node();
+        node_pointer next = curr->next;
+
+        // 
+        curr->next = other.p_end->next;
+        other.p_end->next->prev = curr;
+
+        // 
+        next->prev = other.p_end->prev;
+        other.p_end->prev->next = next;
+
+        // 
+        m_size += other.m_size;
+
+        // 
+        other.m_size = 0;
+        other.init_sentinel_node();
+    }
+
 
     /**
+     * \brief Removes elements satisfying specific criteria
      */
-    // TODO:
-    void remove(const_reference value);
+    void remove(const_reference value) {
+        // 
+        node_pointer curr = p_end->next;
+
+        // 
+        while (curr != p_end) {
+            node_pointer next = curr->next;
+            if (curr->data == value) {
+                curr->prev->next = curr->next;
+                curr->next->prev = curr->prev;
+                delete curr;
+                m_size--;
+            }
+            curr = next;
+        }
+    }
+
 
     /**
-     * TODO:
+     * \brief Reverses the order of the elements
      */
-    void reverse() noexcept;
+    void reverse() noexcept {
+        // 
+        if (m_size < 1)
+            return;
+
+        // 
+        node_pointer current = p_end->next;
+
+        do {
+            std::swap(current->prev, current->next);
+            current = current->prev;
+        } while (current != p_end);
+
+        // 
+        std::swap(p_end->prev, p_end->next);
+    }
+
 
     /**
+     * \brief Removes consecutive duplicate elements
      */
-    // TODO:
-    void unique();
+    void unique() {
+        // 
+        if (m_size < 2) {
+            return;
+        }
+
+        // 
+        node_pointer current = p_end->next;
+        while (current != p_end && current->next != p_end) {
+            node_pointer next = current->next;
+            if (current->data == next->data) {
+                next->next->prev = current;
+                current->next = next->next;
+                delete next;
+                m_size--;
+            } else {
+                current = next;
+            }
+        }
+    }
+
 
     /**
-     * TODO:
+     * \brief Sorts the elements
      */
-    void sort();
+    void sort() {
+        // 
+        if (empty() || p_end->next->next == p_end)
+            return;
 
-    /**
-     * TODO:
-     */
-    template< class Compare >
-    void sort(Compare comp);
+        // break the connection of the sentinel for using merge sort easily
+        node_pointer unsorted_head = p_end->next;
+        p_end->prev->next = nullptr;
+        p_end->next->prev = nullptr;
+        p_end->next       = nullptr;
+        p_end->prev       = nullptr;
+
+        // merge sort
+        node_pointer sorted_head = merge_sort(unsorted_head);
+        node_pointer sorted_tail = sorted_head;
+        while (sorted_tail->next != nullptr)
+            sorted_tail = sorted_tail->next;
+
+        // re-connect
+        p_end->next = sorted_head;
+        sorted_head->prev = p_end;
+        p_end->prev = sorted_tail;
+        sorted_tail->next = p_end;
+    }
 
 
 private:
@@ -780,6 +932,107 @@ private:
     void init_sentinel_node() noexcept {
         p_end->prev = p_end;
         p_end->next = p_end;
+    }
+
+
+    /**
+     * \brief Get middle node for merge sort
+     */
+    node_pointer get_middle_node(node_pointer head) {
+        // 
+        if (head == nullptr || head->next == nullptr)
+            return head;
+
+        // 
+        node_pointer slow = head;
+        node_pointer fast = head;
+
+        // 
+        while (fast->next != nullptr && fast->next->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+
+        return slow;
+    }
+
+
+    /**
+     * \brief merge for merge_sort
+     *
+     * \param head1: head of sorted list 1
+     * \param head2: head of sorted list 2
+     */
+    node_pointer merge(node_pointer head1, node_pointer head2) {
+        // 
+        if (head1 == nullptr)
+            return head2;
+        if (head2 == nullptr)
+            return head1;
+
+        // 
+        node_pointer dummy = new node(0);
+        node_pointer tail = dummy;
+
+        // 
+        while (head1 != nullptr && head2 != nullptr) {
+            if (head1->data < head2->data) {
+                tail->next = head1;
+                head1->prev = tail;
+                head1 = head1->next;
+            } else {
+                tail->next = head2;
+                head2->prev = tail;
+                head2 = head2->next;
+            }
+            tail = tail->next;
+        }
+
+        // 
+        if (head1 != nullptr) {
+            tail->next = head1;
+            head1->prev = tail;
+        }
+        if (head2 != nullptr) {
+            tail->next = head2;
+            head2->prev = tail;
+        }
+
+        // 
+        node_pointer sorted_head = dummy->next;
+        if (sorted_head)
+            sorted_head->prev = nullptr;
+        delete dummy;
+        return sorted_head;
+    }
+
+
+    /**
+     * \brief Merge sort
+     */
+    node_pointer merge_sort(node_pointer head) {
+        // 
+        if (head == nullptr || head->next == nullptr)
+            return head;
+
+        // 
+        node_pointer mid = get_middle_node(head);
+        node_pointer mid_next = mid ? mid->next : nullptr;
+        mid_next->prev = nullptr;
+        mid->next = nullptr;
+
+        // 
+        if (mid != nullptr && mid->next != nullptr) {
+            mid->next->prev = nullptr;
+            mid->next = nullptr;
+        }
+
+        // 
+        node_pointer left_part = merge_sort(head);
+        node_pointer right_part = merge_sort(mid_next);
+
+        // 
+        return merge(left_part, right_part);
     }
 
 

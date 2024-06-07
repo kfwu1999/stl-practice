@@ -237,6 +237,14 @@ TEST(ListTest, Back) {
 }
 
 
+/* Capacity */
+TEST(ListTest, Empty) {
+    // 
+    mystl::list<int> list;
+    EXPECT_TRUE(list.empty());
+}
+
+
 /* Modifiers */
 TEST(ListTest, Insert) {
     // 
@@ -776,6 +784,194 @@ TEST(ListTest, Swap) {
 
 
 /* Operations */
+TEST(ListTest, Merge) {
+    // 
+    std::vector<int> expected = {1, 2, 3, 4, 5, 6};
+    mystl::list<int> list1 = {1, 3, 5};
+    mystl::list<int> list2 = {2, 4, 6};
+
+    list1.merge(list2);
+
+    // 
+    EXPECT_EQ(list1.size(), expected.size());
+
+    // forward
+    int idx = 0;
+    for (auto it = list1.cbegin(); it != list1.cend(); ++it) {
+        EXPECT_EQ(*it, expected[idx++]);
+    }
+
+    // backword
+    idx = expected.size() - 1;
+    for (auto rit = list1.crbegin(); rit != list1.crend() && idx >= 0; ++rit) {
+        EXPECT_EQ(*rit, expected[idx--]);
+    }
+
+    // list2 should be empty
+    EXPECT_EQ(list2.size(), 0);
+    EXPECT_EQ(list2.empty(), true);
+    EXPECT_TRUE(list2.begin() == list2.end());
+}
+
+
+TEST(ListTest, Splice) {
+    // Setup two lists
+    mystl::list<int> list1 = {1, 2, 3};
+    mystl::list<int> list2 = {4, 5, 6};
+
+    // Iterator to the position after which elements will be inserted
+    auto pos = list1.cbegin();
+    std::advance(pos, 1);  // Move iterator to '2'
+
+    // Perform splice
+    list1.splice(pos, list2);
+
+    // Expected result in list1
+    std::vector<int> expected = {1, 2, 4, 5, 6, 3};
+    std::vector<int> result(list1.begin(), list1.end());
+    EXPECT_EQ(result, expected);
+
+    // List2 should be empty
+    EXPECT_TRUE(list2.empty());
+    EXPECT_EQ(list2.size(), 0);
+}
+
+
+TEST(ListTest, Remove) {
+    // 
+    mystl::list<int> list = {1, 2, 3, 2, 4, 2, 5};
+
+    // 
+    list.remove(2);
+
+    // 
+    std::vector<int> expected = {1, 3, 4, 5};
+    std::vector<int> actual(list.begin(), list.end());
+    EXPECT_EQ(actual, expected);
+
+    // 
+    EXPECT_EQ(list.size(), 4);
+
+    // no effect
+    list.remove(6);
+    EXPECT_EQ(list.size(), 4);
+}
+
+
+TEST(ListTest, Reverse) {
+    // 
+    std::vector<int> expected = {5, 4, 3, 2, 1};
+    mystl::list<int> list = {1, 2, 3, 4, 5};
+
+    // 
+    list.reverse();
+
+    // 
+    int idx = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it) {
+        EXPECT_EQ(*it, expected[idx++]);
+    }
+
+    // backword
+    idx = expected.size() - 1;
+    for (auto rit = list.crbegin(); rit != list.crend() && idx >= 0; ++rit) {
+        EXPECT_EQ(*rit, expected[idx--]);
+    }
+
+    // reverse again
+    list.reverse();
+
+    // forward
+    idx = expected.size() - 1;
+    for (auto it = list.cbegin(); it != list.cend(); ++it) {
+        EXPECT_EQ(*it, expected[idx--]);
+    }
+
+    // backword
+    idx = 0;
+    for (auto rit = list.crbegin(); rit != list.crend(); ++rit) {
+        EXPECT_EQ(*rit, expected[idx++]);
+    }
+}
+
+
+TEST(ListTest, Unique) {
+    // 
+    mystl::list<int> list = {1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5};
+    std::vector<int> expected = {1, 2, 3, 4, 5};
+
+    // 
+    list.unique();
+    EXPECT_EQ(list.size(), 5);
+
+    // 
+    int idx = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it) {
+        EXPECT_EQ(*it, expected[idx++]);
+    }
+
+    // backword
+    idx = expected.size() - 1;
+    for (auto rit = list.crbegin(); rit != list.crend() && idx >= 0; ++rit) {
+        EXPECT_EQ(*rit, expected[idx--]);
+    }
+
+    // the list is already unique
+    list.unique();
+    EXPECT_EQ(list.size(), 5);
+
+    // 
+    idx = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it) {
+        EXPECT_EQ(*it, expected[idx++]);
+    }
+
+    // backword
+    idx = expected.size() - 1;
+    for (auto rit = list.crbegin(); rit != list.crend() && idx >= 0; ++rit) {
+        EXPECT_EQ(*rit, expected[idx--]);
+    }
+}
+
+
+TEST(ListTest, Sort) {
+    // 
+    std::vector<int> unsorted = {7, 3, 5, 1, 2, 6, 4, 1, 8};
+    std::vector<int> sorted   = {1, 1, 2, 3, 4, 5, 6, 7, 8};
+    mystl::list<int> list(unsorted.begin(), unsorted.end());
+
+    // 
+    list.sort();
+
+    // 
+    EXPECT_EQ(list.size(), sorted.size());
+
+    // forward
+    int idx = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it)
+        EXPECT_EQ(*it, sorted[idx++]);
+    
+    // backward
+    idx = sorted.size() - 1;
+    for (auto rit = list.crbegin(); rit != list.crend(); ++rit)
+        EXPECT_EQ(*rit, sorted[idx--]);
+
+    // Sort a sorted list again
+    list.sort();
+
+    // 
+    EXPECT_EQ(list.size(), sorted.size());
+
+    // forward
+    idx = 0;
+    for (auto it = list.cbegin(); it != list.cend(); ++it)
+        EXPECT_EQ(*it, sorted[idx++]);
+    
+    // backward
+    idx = sorted.size() - 1;
+    for (auto rit = list.crbegin(); rit != list.crend(); ++rit)
+        EXPECT_EQ(*rit, sorted[idx--]);
+}
 
 
 /**/

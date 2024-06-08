@@ -153,6 +153,26 @@ TEST(vectorTest, AtThrowsOutOfRange) {
 
 /**
  */
+TEST(vectorTest, Front) {
+    mystl::vector<int> vec;
+    EXPECT_THROW(vec.front(), std::out_of_range);
+    vec.push_back(1);
+    EXPECT_EQ(vec.front(), *vec.cbegin());
+}
+
+
+/**
+ */
+TEST(vectorTest, Back) {
+    mystl::vector<int> vec;
+    EXPECT_THROW(vec.back(), std::out_of_range);
+    vec.push_back(1);
+    EXPECT_EQ(vec.back(), *std::prev(vec.cend()));
+}
+
+
+/**
+ */
 TEST(vectorTest, Reserve) {
     mystl::vector<int> vec;
     vec.reserve(100);

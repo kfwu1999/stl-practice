@@ -288,6 +288,50 @@ public:
     }
 
     /**
+     * \brief Access the first element
+     *
+     * \throws std::out_of_range if the container is empty.
+     */
+    reference front() { 
+        if (empty())
+            throw std::out_of_range("front(): list is empty");
+        return p_elem[0]; 
+    }
+
+    /**
+     * \brief Access the first element
+     *
+     * \throws std::out_of_range if the container is empty.
+     */
+    const_reference front() const { 
+        if (empty())
+            throw std::out_of_range("front(): list is empty");
+        return p_elem[0]; 
+    }
+
+    /**
+     * \brief Access the last elemet
+     *
+     * \throws std::out_of_range if the container is empty.
+     */
+    reference back() { 
+        if (empty())
+            throw std::out_of_range("back(): list is empty");
+        return p_elem[m_size-1];
+    }
+
+    /**
+     * \brief Access the last elemet
+     *
+     * \throws std::out_of_range if the container is empty.
+     */
+    const_reference back() const { 
+        if (empty())
+            throw std::out_of_range("back(): list is empty");
+        return p_elem[m_size-1];
+    }
+
+    /**
      * \brief Direct access to the underlying contiguous storage
      */
     pointer data() noexcept { return p_elem; }

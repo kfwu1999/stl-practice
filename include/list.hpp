@@ -7,7 +7,7 @@
 #ifndef LIST_HPP_
 #define LIST_HPP_
 
-#include <iterator>         // forward_iterator_tag
+#include <iterator>         // bidirectional_iterator_tag
 #include <utility>          // move, forward
 #include <cstddef>          // size_t
 #include <initializer_list> // initializer_list
@@ -515,7 +515,7 @@ public:
      *
      * \param pos: An iterator to the element to be erased.
      * \return An iterator pointing to the element after the erased element.
-     * \exception std::out_of_range: Thrown if an attempt to erase the end iterator.
+     * \throws std::out_of_range: Thrown if an attempt to erase the end iterator.
      */
     iterator erase(const_iterator pos) {
         // 
@@ -881,16 +881,16 @@ public:
         }
 
         // 
-        node_pointer current = p_end->next;
-        while (current != p_end && current->next != p_end) {
-            node_pointer next = current->next;
-            if (current->data == next->data) {
-                next->next->prev = current;
-                current->next = next->next;
+        node_pointer curr = p_end->next;
+        while (curr != p_end && curr->next != p_end) {
+            node_pointer next = curr->next;
+            if (curr->data == next->data) {
+                next->next->prev = curr;
+                curr->next = next->next;
                 delete next;
                 m_size--;
             } else {
-                current = next;
+                curr = next;
             }
         }
     }
@@ -917,7 +917,7 @@ public:
         while (sorted_tail->next != nullptr)
             sorted_tail = sorted_tail->next;
 
-        // re-connect
+        // reconnect nodes to `p_end`
         p_end->next = sorted_head;
         sorted_head->prev = p_end;
         p_end->prev = sorted_tail;

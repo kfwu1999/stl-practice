@@ -23,7 +23,8 @@ template <typename _T>
 class list {
 private:
     struct node;
-    template <typename ValueType> class list_iterator_base;
+    template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
+    class list_iterator_base;
 
 public:
     using value_type             = _T;
@@ -32,8 +33,8 @@ public:
     using reference              = _T&;
     using const_pointer          = const _T*;
     using const_reference        = const _T&;
-    using iterator               = list_iterator_base<_T>;
-    using const_iterator         = list_iterator_base<const _T>;
+    using iterator               = list_iterator_base<_T, pointer, reference>;
+    using const_iterator         = list_iterator_base<_T, const_pointer, const_reference>;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -65,16 +66,21 @@ private:
 
 /* Iterator */
 private:
-    template <typename ValueType>
+    /**
+     * \brief Iterator for the mystl::list class template that supports bidirectional iterator operations.
+     *
+     * \tparam _Iter_val Type of the value that the iterator points to.
+     * \tparam _Iter_ptr Type of the pointer to the value (const or non-const).
+     * \tparam _Iter_ref Type of the reference to the value (const or non-const).
+     */
+    template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
     class list_iterator_base {
         friend class list<_T>;
 
     public:
-        using value_type        = ValueType;
-        using pointer           = value_type*;
-        using reference         = value_type&;
-        using const_pointer     = const value_type*;
-        using const_reference   = const value_type&;
+        using value_type        = _Iter_val;
+        using pointer           = _Iter_ptr;
+        using reference         = _Iter_ref;
         using difference_type   = std::ptrdiff_t;
         using iterator_category = std::bidirectional_iterator_tag;
 

@@ -67,7 +67,7 @@ private:
 private:
     template <typename ValueType>
     class list_iterator_base {
-        friend class list<value_type>;
+        friend class list<_T>;
 
     public:
         using value_type        = ValueType;

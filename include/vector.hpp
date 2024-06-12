@@ -1,6 +1,6 @@
 /**
  * \file vector.hpp
-
+ *
  * \reference:
  * - The Cherno: VECTOR/DYNAMIC ARRAY - Making DATA STRUCTURES in C++
  *          url: https://youtu.be/ryRf4Jh_YC0?si=9gncPajBHf4uIz-T
@@ -28,64 +28,6 @@ namespace mystl {
 
 
 /**
- * \class vector_iterator
- */
-template <typename _vector>
-class vector_iterator {
-public:
-    using value_type        = typename _vector::value_type;
-    using pointer           = value_type*;
-    using reference         = value_type&;
-    using const_pointer     = const value_type*;
-    using const_reference   = const value_type&;
-    using difference_type   = std::ptrdiff_t;
-    using iterator_category = std::random_access_iterator_tag;   // C++ named requirements: LegacyRandomAccessIterator
-
-public:
-    vector_iterator() : p_ptr(nullptr) {}
-    vector_iterator(pointer ptr) : p_ptr(ptr) {}
-
-public:
-    reference       operator*()                 { return *p_ptr; }
-    const_reference operator*()           const { return *p_ptr; }
-    pointer         operator->()                { return p_ptr; }
-    const_pointer   operator->()          const { return p_ptr; }
-    reference       operator[](int index)       { return *(p_ptr + index); }
-    const_reference operator[](int index) const { return *(p_ptr + index); }
-
-    vector_iterator& operator+=(int n) { p_ptr += n; return *this; }
-    vector_iterator& operator-=(int n) { p_ptr -= n; return *this; }
-    vector_iterator& operator++()      { ++p_ptr; return *this; }
-    vector_iterator& operator--()      { --p_ptr; return *this; }
-    vector_iterator operator++(int) { 
-        vector_iterator old(*this);   // remember original value
-        ++(*this);                    // post-increment
-        return old;                   // return original value
-    }
-    vector_iterator operator--(int) { 
-        vector_iterator old(*this);   // remember original value
-        --(*this);                    // post-decrement
-        return old;                   // return original value
-    }
-
-    vector_iterator operator+(int n) const { vector_iterator temp(*this); return temp += n; }
-    vector_iterator operator-(int n) const { vector_iterator temp(*this); return temp -= n; }
-
-    difference_type operator-(const vector_iterator& other) const { return p_ptr - other.p_ptr; }
-
-    bool operator<(const vector_iterator& other)  const { return p_ptr <  other.p_ptr; }
-    bool operator<=(const vector_iterator& other) const { return p_ptr <= other.p_ptr; }
-    bool operator>(const vector_iterator& other)  const { return p_ptr >  other.p_ptr; }
-    bool operator>=(const vector_iterator& other) const { return p_ptr >= other.p_ptr; }
-    bool operator==(const vector_iterator& other) const { return p_ptr == other.p_ptr; }
-    bool operator!=(const vector_iterator& other) const { return p_ptr != other.p_ptr; }
-
-private:
-    pointer p_ptr;
-};
-
-
-/**
  * \class vector
  *
  * A template class of a simplified version of the std::vector,
@@ -93,6 +35,10 @@ private:
  */
 template <typename _T>
 class vector {
+private:
+    template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
+    class vector_iterator_base;
+
 public:
     using value_type             = _T;
     using size_type              = std::size_t;
@@ -101,14 +47,75 @@ public:
     using const_pointer          = const _T*;
     using const_reference        = const _T&;
     using difference_type        = std::ptrdiff_t;
-    using iterator               = vector_iterator<vector<value_type>>;
-    using const_iterator         = vector_iterator<vector<const value_type>>;
+    using iterator               = vector_iterator_base<value_type, pointer, reference>;
+    using const_iterator         = vector_iterator_base<value_type, const_pointer, const_reference>;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
     static constexpr size_type DEFAULT_CAPACITY = 10;
     static constexpr size_type REALLOC_RATE     = 2;
+
+private:
+    /**
+     * \brief Iterator for the mystl::vector class template that supports random access iterator operations.
+     *
+     * \tparam _Iter_val Type of the value that the iterator points to.
+     * \tparam _Iter_ptr Type of the pointer to the value (const or non-const).
+     * \tparam _Iter_ref Type of the reference to the value (const or non-const).
+     *
+     * \ref: StackExchange: Basic iterator supporting vector implementation
+     *                 url: https://codereview.stackexchange.com/questions/202157/basic-iterator-supporting-vector-implementation
+     */
+    template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
+    class vector_iterator_base {
+    public:
+        using value_type        = _Iter_val;
+        using pointer           = _Iter_ptr;
+        using reference         = _Iter_ref;
+        using difference_type   = std::ptrdiff_t;
+        using iterator_category = std::random_access_iterator_tag;   // C++ named requirements: LegacyRandomAccessIterator
+
+    public:
+        vector_iterator_base() : p_ptr(nullptr) {}
+        vector_iterator_base(pointer ptr) : p_ptr(ptr) {}
+
+    public:
+        reference operator*()           const { return *p_ptr; }
+        pointer   operator->()          const { return p_ptr; }
+        reference operator[](int index) const { return *(p_ptr + index); }
+
+        vector_iterator_base& operator+=(int n) { p_ptr += n; return *this; }
+        vector_iterator_base& operator-=(int n) { p_ptr -= n; return *this; }
+        vector_iterator_base& operator++()      { ++p_ptr; return *this; }
+        vector_iterator_base& operator--()      { --p_ptr; return *this; }
+        vector_iterator_base operator++(int) { 
+            vector_iterator_base old(*this);   // remember original value
+            ++(*this);                    // post-increment
+            return old;                   // return original value
+        }
+        vector_iterator_base operator--(int) { 
+            vector_iterator_base old(*this);   // remember original value
+            --(*this);                    // post-decrement
+            return old;                   // return original value
+        }
+
+        vector_iterator_base operator+(int n) const { vector_iterator_base temp(*this); return temp += n; }
+        vector_iterator_base operator-(int n) const { vector_iterator_base temp(*this); return temp -= n; }
+
+        difference_type operator-(const vector_iterator_base& other) const { return p_ptr - other.p_ptr; }
+
+        bool operator<(const vector_iterator_base& other)  const { return p_ptr <  other.p_ptr; }
+        bool operator<=(const vector_iterator_base& other) const { return p_ptr <= other.p_ptr; }
+        bool operator>(const vector_iterator_base& other)  const { return p_ptr >  other.p_ptr; }
+        bool operator>=(const vector_iterator_base& other) const { return p_ptr >= other.p_ptr; }
+        bool operator==(const vector_iterator_base& other) const { return p_ptr == other.p_ptr; }
+        bool operator!=(const vector_iterator_base& other) const { return p_ptr != other.p_ptr; }
+
+    private:
+        pointer p_ptr;
+    };
+
 
 public:
     /**

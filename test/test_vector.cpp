@@ -2,9 +2,11 @@
  * \file test_vector.cpp
  */
 
-#include "vector.hpp"
-#include <stdexcept>
 #include <gtest/gtest.h>
+#include <algorithm>      // std::sort
+#include <stdexcept>
+
+#include "vector.hpp"
 
 
 /**
@@ -410,6 +412,26 @@ TEST(vectorTest, CorrectlyManagesResourcesWithDynamicAllocation) {
     // 
     mystl::vector<MyClass> vec;
     vec.push_back(MyClass());
+}
+
+
+/**
+ * Test Case: SortUsingStdSort
+ * 
+ * This test checks if mystl::vector can be used with the std::sort algorithm
+ * to correctly sort its elements.
+ */
+TEST(VectorTest, SortUsingStdSort) {
+    // 
+    mystl::vector<int> vec = {4, 4, 8, 7, 6, 3, 3};
+
+    // Using std::sort to sort the vector
+    std::sort(vec.begin(), vec.end());
+
+    // Check if the vector is sorted
+    for (size_t i = 0; i < vec.size() - 1; ++i) {
+        EXPECT_LE(vec[i], vec[i + 1]) << "Vector is not sorted at index " << i;
+    }
 }
 
 

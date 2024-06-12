@@ -27,7 +27,7 @@ class forward_list {
 private:
     struct node;
 
-    template <typename ValueType> 
+    template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
     class forward_iterator_base;
 
 public:
@@ -37,8 +37,8 @@ public:
     using reference       = _T&;
     using const_pointer   = const _T*;
     using const_reference = const _T&;
-    using iterator        = forward_iterator_base<_T>;
-    using const_iterator  = forward_iterator_base<const _T>;
+    using iterator        = forward_iterator_base<_T, pointer, reference>;
+    using const_iterator  = forward_iterator_base<_T, const_pointer, const_reference>;
 
     using node_pointer    = node*;
 
@@ -69,17 +69,20 @@ private:
 /* Iterators */
 private:
     /**
+     * \brief Iterator for the mystl::list class template that supports forward iterator operations.
+     *
+     * \tparam _Iter_val Type of the value that the iterator points to.
+     * \tparam _Iter_ptr Type of the pointer to the value (const or non-const).
+     * \tparam _Iter_ref Type of the reference to the value (const or non-const).
      */
-    template <typename ValueType>
+    template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
     class forward_iterator_base {
         friend class forward_list<_T>;
 
     public:
-        using value_type        = ValueType;
-        using pointer           = value_type*;
-        using reference         = value_type&;
-        using const_pointer     = const value_type*;
-        using const_reference   = const value_type&;
+        using value_type        = _Iter_val;
+        using pointer           = _Iter_ptr;
+        using reference         = _Iter_ref;
         using difference_type   = std::ptrdiff_t;
         using iterator_category = std::forward_iterator_tag;
 

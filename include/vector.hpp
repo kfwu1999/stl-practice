@@ -17,11 +17,11 @@
 
 #include <cstddef>          // size_t
 #include <utility>          // move, forward
-#include <new>              // ::operator new, ::operator delete
 #include <initializer_list> // initializer_list
 #include <stdexcept>        // out_of_range
 #include <iterator>         // random_access_iterator_tag, distance
 #include <type_traits>      // enable_if, is_integral
+#include <memory>           // allocator
 
 
 namespace mystl {
@@ -33,7 +33,7 @@ namespace mystl {
  * A template class of a simplified version of the std::vector,
  * providing dynamic array functionality with the ability to resize.
  */
-template <typename _T>
+template <typename _T, typename _Allocator = std::allocator<_T>>
 class vector {
 private:
     template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
@@ -41,6 +41,7 @@ private:
 
 public:
     using value_type             = _T;
+    using allocator_type         = _Allocator;
     using size_type              = std::size_t;
     using pointer                = _T*;
     using reference              = _T&;
@@ -112,6 +113,10 @@ private:
         bool operator==(const vector_iterator_base& other) const { return p_ptr == other.p_ptr; }
         bool operator!=(const vector_iterator_base& other) const { return p_ptr != other.p_ptr; }
 
+        pointer base() const {
+            return p_ptr;
+        }
+
     private:
         pointer p_ptr;
     };
@@ -120,24 +125,41 @@ private:
 public:
     /**
      * \brief Construct new vector with default initial capacity.
+     *
+     * \param alloc: allocator to use for all memory allocations of this container.
      */
-    vector() 
-        : m_size(0), m_capacity(DEFAULT_CAPACITY), 
-          p_elem(static_cast<pointer>(::operator new(DEFAULT_CAPACITY * sizeof(value_type))))
+    vector(const allocator_type& alloc = allocator_type()) 
+        : m_alloc(alloc), m_size(0), m_capacity(0), 
+          p_elem(nullptr)
     {
+        realloc(DEFAULT_CAPACITY);
     }
 
 
     /**
      * \brief Constructs the container with count copies of elements with value. 
      *
-     * If `value` is not specified, the elements will initializ to their default-constructed values.
+     * \param count: The number of elements to construct.
+     * \param value: The value to initialize the elements.
+     * \param alloc: allocator to use for all memory allocations of this container.
+     */
+    vector(size_type count, const_reference value, const allocator_type& alloc = allocator_type()) 
+        : m_alloc(alloc), m_size(0), m_capacity(0), p_elem(nullptr)
+    {
+        resize(count, value);
+    }
+
+
+    /**
+     * \brief Constructs the container with count copies of elements with default-constructed value. 
      *
      * \param count: The number of elements to construct.
-     * \param value: The value to initialize the elements, default is a default-constructed of value_type.
+     * \param alloc: allocator to use for all memory allocations of this container.
      */
-    explicit vector(size_type count, const_reference value = value_type()) {
-        resize(count, value);
+    explicit vector(size_type count, const allocator_type& alloc = allocator_type()) 
+        : m_alloc(alloc), m_size(0), m_capacity(0), p_elem(nullptr)
+    {
+        resize(count, value_type());
     }
 
 
@@ -148,18 +170,21 @@ public:
      * \note Enabled only if InputIt is an iterator. (using SFINAE)
      *
      * \param first, last: iterators defining the range to be copied into the
-     * vector, the `first` must be smaller than `last`
+     * vector, the `first` must be smaller than `last`.
+     * \param alloc: allocator to use for all memory allocations of this container.
      */
     template <typename InputIt, 
               typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
-    vector(InputIt first, InputIt last)
-        : m_size(last - first),
+    vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type())
+        : m_alloc(alloc), 
+          m_size(last - first),
           m_capacity(m_size),
-          p_elem(static_cast<pointer>(::operator new(m_capacity * sizeof(value_type))))
+          p_elem(m_alloc.allocate(m_capacity))
     {
+        // 
         size_type i = 0;
         for (InputIt it = first; it != last; ++it, ++i) {
-            new(&p_elem[i]) value_type(*it);
+            m_alloc.construct(p_elem + i, *it);
         }
     }
 
@@ -168,12 +193,12 @@ public:
      * \brief Copy constructor
      */
     vector(const vector<value_type>& other)
-        : m_size(other.m_size), m_capacity(other.m_capacity), p_elem(nullptr)
+        : m_alloc(other.m_alloc), m_size(other.m_size), m_capacity(other.m_capacity), p_elem(nullptr)
     {
         if (other.p_elem != nullptr) {
-            p_elem = static_cast<pointer>(::operator new(m_capacity * sizeof(value_type)));
+            p_elem = m_alloc.allocate(m_capacity);
             for (size_type i = 0; i < m_size; ++i)
-                new(&p_elem[i]) value_type(other.p_elem[i]);
+                m_alloc.construct(p_elem + i, other.p_elem[i]);
         }
     }
 
@@ -182,7 +207,7 @@ public:
      * \brief Move constructor
      */
     vector(vector<value_type>&& other) noexcept
-        : m_size(other.m_size), m_capacity(other.m_capacity), p_elem(other.p_elem)
+        : m_alloc(other.m_alloc), m_size(other.m_size), m_capacity(other.m_capacity), p_elem(other.p_elem)
     {
         other.m_size = 0;
         other.m_capacity = 0;
@@ -192,14 +217,18 @@ public:
 
     /**
      * \brief Construct by initializer.
+     *
+     * \param initList: initializer list to initialize the elements of the container with.
+     * \param alloc: allocator to use for all memory allocations of this container.
      */
-    vector(std::initializer_list<value_type> initList) 
-        : m_size(initList.size()), m_capacity(m_size),
-          p_elem(static_cast<pointer>(::operator new(m_size * sizeof(value_type))))
+    vector(std::initializer_list<value_type> initList, const allocator_type& alloc = allocator_type())
+        : m_alloc(alloc), m_size(initList.size()), m_capacity(m_size),
+          p_elem(m_alloc.allocate(m_capacity))
     {
         size_type i = 0;
         for (auto& elem : initList) {
-            new(&p_elem[i++]) value_type(elem);   // in-place construct
+            m_alloc.construct(p_elem + i, elem);
+            ++i;
         }
     }
 
@@ -218,6 +247,7 @@ public:
 /* Operators */
 public:
     /**
+     * \brief Access specified element
      */
     reference operator[](size_type index) { return p_elem[index]; }
     const_reference operator[](size_type index) const { return p_elem[index]; }
@@ -228,12 +258,15 @@ public:
     vector& operator=(const vector& other) {
         if (this != &other) {
             // 
+            m_alloc = other.m_alloc;
+
+            // 
             if (m_capacity < other.m_capacity) {
                 // old capaacity is not enough
                 clear();
                 destroy_vector();
                 m_capacity = other.m_capacity;
-                p_elem = static_cast<value_type*>(::operator new(m_capacity * sizeof(value_type)));
+                p_elem = m_alloc.allocate(m_capacity);
             }
             else {
                 // reuse old memory space, clear without destroy
@@ -243,7 +276,7 @@ public:
             // 
             m_size = other.m_size;
             for (size_type i = 0; i < other.m_size; ++i) 
-                new(&p_elem[i]) value_type(other.p_elem[i]);
+                m_alloc.construct(p_elem + i, other.p_elem[i]);
         }
         return *this;
     }
@@ -253,6 +286,9 @@ public:
      */
     vector& operator=(vector&& other) noexcept {
         if (this != &other) {
+            // 
+            m_alloc = other.m_alloc;
+
             // clear and delete current elements
             clear();
             destroy_vector();
@@ -402,12 +438,12 @@ public:
     /**
      * \brief Clear all contents in vector.
      *
-     * Invokes the destructor for each element in the vector, effectively
-     * destroying all contained objects and resetting the vector's size to 0.
+     * Use allocator::destroy to destruct all elements in the vector, and set 
+     * the vector's size to 0.
      */
     void clear() {
         for (size_type i = 0; i < m_size; ++i) {
-            p_elem[i].~value_type();
+            m_alloc.destroy(p_elem + i);
         }
         m_size = 0;
     }
@@ -436,7 +472,7 @@ public:
         }
 
         // Destroy element
-        (it)->~value_type();
+        m_alloc.destroy(it.base());
         m_size--;
 
         // 
@@ -477,7 +513,7 @@ public:
         // destroy elements
         iterator newEnd = end() - (dist2last - dist2first);
         while (itLeft != newEnd) {
-            (itLeft)->~value_type();
+            m_alloc.destroy(itLeft.base());
             itLeft++;
         }
 
@@ -498,21 +534,21 @@ public:
      */
     template <typename ...Args>
     iterator emplace(const_iterator pos, Args&&... args) {
-        // calculate the `tarIndex` first because the iterator `pos` will be invalidate after using `realloc`
+        // compute the `tarIndex` first because the iterator `pos` will be invalidate after using `realloc`
         size_type tarIndex = pos - cbegin();
 
         // check capacity
         if (m_size >= m_capacity)
-            realloc(REALLOC_RATE * m_capacity);
+            realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
 
         // shift elements after pos
         for (size_type i = m_size; i > tarIndex; --i) {
-            new(&p_elem[i]) value_type(std::move(p_elem[i-1]));
-            p_elem[i-1].~value_type();
+            m_alloc.construct(p_elem + i, std::move(p_elem[i-1]));
+            m_alloc.destroy(p_elem + i - 1);
         }
 
-        // in-place construct
-        new(&p_elem[tarIndex]) value_type(std::forward<Args>(args)...);
+        // construct
+        m_alloc.construct(p_elem + tarIndex, std::forward<Args>(args)...);
         ++m_size;
 
         // 
@@ -539,10 +575,10 @@ public:
      * \brief Insert at the end of the vector.
      */
     void push_back(const_reference value) {
-        if (m_size >= m_capacity) {
-            realloc(REALLOC_RATE * m_capacity);
-        }
-        p_elem[m_size++] = value;
+        if (m_size >= m_capacity)
+            realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
+        m_alloc.construct(p_elem + m_size, value);
+        m_size++;
     }
 
 
@@ -550,10 +586,10 @@ public:
      * \brief Insert at the end of the vector.
      */
     void push_back(value_type&& value) {
-        if (m_size >= m_capacity) {
-            realloc(REALLOC_RATE * m_capacity);
-        }
-        p_elem[m_size++] = std::move(value);   // cast value to rval reference
+        if (m_size >= m_capacity)
+            realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
+        m_alloc.construct(p_elem + m_size, std::move(value));
+        m_size++;
     }
 
 
@@ -562,11 +598,9 @@ public:
      */
     template <typename... Args>
     reference emplace_back(Args&&... args) {
-        if (m_size >= m_capacity) {
-            realloc(REALLOC_RATE * m_capacity);
-        }
-        // p_elem[m_size] = value_type(std::forward<Args>(args)...);
-        new(&p_elem[m_size]) value_type(std::forward<Args>(args)...);   // in-place construction
+        if (m_size >= m_capacity)
+            realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
+        m_alloc.construct(p_elem + m_size, std::forward<Args>(args)...);
         return p_elem[m_size++];
     }
 
@@ -576,7 +610,8 @@ public:
      */
     void pop_back() {
         if (m_size > 0) {
-            p_elem[--m_size].~value_type();
+            m_alloc.destroy(p_elem + m_size);
+            --m_size;
         }
         else {
             throw std::length_error("vector::pop_back(): the vector is empty");
@@ -590,7 +625,7 @@ public:
      * \param count: new size of the container
      * \param value: the value to initialize the new elements with
      */
-    void resize(size_type count, const_reference value) {
+    void resize(size_type count, const_reference value = value_type()) {
         // 
         if (m_size > count) {
             erase(cbegin() + count, cend());
@@ -600,16 +635,12 @@ public:
                 reserve(count);
             }
             for (size_type i = m_size; i < count; ++i) {
-                new(&p_elem[i]) value_type(value);
+                m_alloc.construct(p_elem + i, value);
             }
         }
 
         // 
         m_size = count;
-    }
-
-    void resize(size_type count) {
-        resize(count, value_type());
     }
 
 
@@ -632,13 +663,13 @@ private:
      */
     void realloc(size_type newCapacity) {
         // allocate a new block of memory
-        pointer newBlock = static_cast<pointer>(::operator new(newCapacity * sizeof(value_type)));
+        pointer newBlock = m_alloc.allocate(newCapacity);
 
         // copy/move old elements into new block
         size_type elemNum = newCapacity > m_size ? m_size : newCapacity;
         for (size_type i = 0; i < elemNum; ++i) {
-            new(&newBlock[i]) value_type(std::move(p_elem[i]));
-            p_elem[i].~value_type();
+            m_alloc.construct(newBlock + i, std::move(p_elem[i]));
+            m_alloc.destroy(p_elem + i);
         }
 
         // 
@@ -657,16 +688,17 @@ private:
      */
     void destroy_vector() {
         clear();
-        ::operator delete[](p_elem);
+        m_alloc.deallocate(p_elem, m_capacity);
         p_elem = nullptr;
         m_capacity = 0;
     }
 
 
 private:
-    size_type m_size     = 0;
-    size_type m_capacity = 0;
-    pointer   p_elem     = nullptr;
+    allocator_type m_alloc;
+    size_type      m_size;
+    size_type      m_capacity;
+    pointer        p_elem;
 };
 
 

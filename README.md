@@ -30,6 +30,7 @@ ctest
 - `list`
 - `stack`
 - `queue`
+- `priority_queue`
 
 
 ## Reference

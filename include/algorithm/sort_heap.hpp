@@ -9,7 +9,7 @@
 
 #include <iterator>
 #include <functional>
-#include <__algorithm/iter_swap.h>
+#include <algorithm>   // for iter_swap   TODO: implement my own iter_swap someday for avoid cyclic dependencies.
 
 #include "algorithm/pop_heap.hpp"
 

@@ -10,7 +10,7 @@
  * Test Case: DefaultConstructor
  */
 TEST(ArrayTest, DefaultConstructor) {
-    mystl::array<int, 5> arr;
+    mystl::array<int, 5> arr = {0};
     EXPECT_EQ(arr.size(), 5);
 }
 

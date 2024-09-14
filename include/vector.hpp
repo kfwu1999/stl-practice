@@ -179,12 +179,12 @@ public:
         : m_alloc(alloc), 
           m_size(last - first),
           m_capacity(m_size),
-          p_elem(m_alloc.allocate(m_capacity))
+          p_elem(std::allocator_traits<allocator_type>::allocate(m_alloc, m_capacity))
     {
         // 
         size_type i = 0;
         for (InputIt it = first; it != last; ++it, ++i) {
-            m_alloc.construct(p_elem + i, *it);
+            std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + i, *it);
         }
     }
 
@@ -196,9 +196,9 @@ public:
         : m_alloc(other.m_alloc), m_size(other.m_size), m_capacity(other.m_capacity), p_elem(nullptr)
     {
         if (other.p_elem != nullptr) {
-            p_elem = m_alloc.allocate(m_capacity);
+            p_elem = std::allocator_traits<allocator_type>::allocate(m_alloc, m_capacity);
             for (size_type i = 0; i < m_size; ++i)
-                m_alloc.construct(p_elem + i, other.p_elem[i]);
+                std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + i, other.p_elem[i]);
         }
     }
 
@@ -223,11 +223,11 @@ public:
      */
     vector(std::initializer_list<value_type> initList, const allocator_type& alloc = allocator_type())
         : m_alloc(alloc), m_size(initList.size()), m_capacity(m_size),
-          p_elem(m_alloc.allocate(m_capacity))
+          p_elem(std::allocator_traits<allocator_type>::allocate(m_alloc, m_capacity))
     {
         size_type i = 0;
         for (auto& elem : initList) {
-            m_alloc.construct(p_elem + i, elem);
+            std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + i, elem);
             ++i;
         }
     }
@@ -266,7 +266,7 @@ public:
                 clear();
                 destroy_vector();
                 m_capacity = other.m_capacity;
-                p_elem = m_alloc.allocate(m_capacity);
+                p_elem = std::allocator_traits<allocator_type>::allocate(m_alloc, m_capacity);
             }
             else {
                 // reuse old memory space, clear without destroy
@@ -276,7 +276,7 @@ public:
             // 
             m_size = other.m_size;
             for (size_type i = 0; i < other.m_size; ++i) 
-                m_alloc.construct(p_elem + i, other.p_elem[i]);
+                std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + i, other.p_elem[i]);
         }
         return *this;
     }
@@ -443,7 +443,7 @@ public:
      */
     void clear() {
         for (size_type i = 0; i < m_size; ++i) {
-            m_alloc.destroy(p_elem + i);
+            std::allocator_traits<allocator_type>::destroy(m_alloc, p_elem + i);
         }
         m_size = 0;
     }
@@ -472,7 +472,7 @@ public:
         }
 
         // Destroy element
-        m_alloc.destroy(it.base());
+        std::allocator_traits<allocator_type>::destroy(m_alloc, it.base());
         m_size--;
 
         // 
@@ -513,7 +513,7 @@ public:
         // destroy elements
         iterator newEnd = end() - (dist2last - dist2first);
         while (itLeft != newEnd) {
-            m_alloc.destroy(itLeft.base());
+            std::allocator_traits<allocator_type>::destroy(m_alloc, itLeft.base());
             itLeft++;
         }
 
@@ -543,12 +543,12 @@ public:
 
         // shift elements after pos
         for (size_type i = m_size; i > tarIndex; --i) {
-            m_alloc.construct(p_elem + i, std::move(p_elem[i-1]));
-            m_alloc.destroy(p_elem + i - 1);
+            std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + i, std::move(p_elem[i-1]));
+            std::allocator_traits<allocator_type>::destroy(m_alloc, p_elem + i - 1);
         }
 
         // construct
-        m_alloc.construct(p_elem + tarIndex, std::forward<Args>(args)...);
+        std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + tarIndex, std::forward<Args>(args)...);
         ++m_size;
 
         // 
@@ -577,7 +577,7 @@ public:
     void push_back(const_reference value) {
         if (m_size >= m_capacity)
             realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
-        m_alloc.construct(p_elem + m_size, value);
+        std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + m_size, value);
         m_size++;
     }
 
@@ -588,7 +588,7 @@ public:
     void push_back(value_type&& value) {
         if (m_size >= m_capacity)
             realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
-        m_alloc.construct(p_elem + m_size, std::move(value));
+        std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + m_size, std::move(value));
         m_size++;
     }
 
@@ -600,7 +600,7 @@ public:
     reference emplace_back(Args&&... args) {
         if (m_size >= m_capacity)
             realloc(m_capacity == 0 ? 1 : REALLOC_RATE * m_capacity);
-        m_alloc.construct(p_elem + m_size, std::forward<Args>(args)...);
+        std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + m_size, std::forward<Args>(args)...);
         return p_elem[m_size++];
     }
 
@@ -610,7 +610,7 @@ public:
      */
     void pop_back() {
         if (m_size > 0) {
-            m_alloc.destroy(p_elem + m_size);
+            std::allocator_traits<allocator_type>::destroy(m_alloc, p_elem + m_size);
             --m_size;
         }
         else {
@@ -635,7 +635,7 @@ public:
                 reserve(count);
             }
             for (size_type i = m_size; i < count; ++i) {
-                m_alloc.construct(p_elem + i, value);
+                std::allocator_traits<allocator_type>::construct(m_alloc, p_elem + i, value);
             }
         }
 
@@ -663,13 +663,13 @@ private:
      */
     void realloc(size_type newCapacity) {
         // allocate a new block of memory
-        pointer newBlock = m_alloc.allocate(newCapacity);
+        pointer newBlock = std::allocator_traits<allocator_type>::allocate(m_alloc, newCapacity);
 
         // copy/move old elements into new block
         size_type elemNum = newCapacity > m_size ? m_size : newCapacity;
         for (size_type i = 0; i < elemNum; ++i) {
-            m_alloc.construct(newBlock + i, std::move(p_elem[i]));
-            m_alloc.destroy(p_elem + i);
+            std::allocator_traits<allocator_type>::construct(m_alloc, newBlock + i, std::move(p_elem[i]));
+            std::allocator_traits<allocator_type>::destroy(m_alloc, p_elem + i);
         }
 
         // 
@@ -688,7 +688,7 @@ private:
      */
     void destroy_vector() {
         clear();
-        m_alloc.deallocate(p_elem, m_capacity);
+        std::allocator_traits<allocator_type>::deallocate(m_alloc, p_elem, m_capacity);
         p_elem = nullptr;
         m_capacity = 0;
     }

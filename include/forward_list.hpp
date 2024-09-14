@@ -14,7 +14,6 @@
 #include <initializer_list> // initializer_list
 #include <cassert>          // assert
 #include <stdexcept>        // out_of_range, logic_error
-#include <type_traits>      // enable_if
 
 namespace mystl {
 
@@ -152,9 +151,12 @@ public:
 
     /**
      * \brief Constructs the container with the contents of the range `[first, last)`.
+     *
+     * \note The `InputIt` must satisfy at least the requirements of `std::input_iterator`.
+     *
+     * \param first, last: iterators defining the range to be copied.
      */
-    template <typename InputIt,
-              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    template <std::input_iterator InputIt>
     forward_list(InputIt first, InputIt last)
         : m_size(0), p_before_head(new node)
     {
@@ -405,8 +407,7 @@ public:
     }
 
 
-    template <typename InputIt,
-              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    template <std::input_iterator InputIt>
     iterator insert_after(const_iterator pos, InputIt first, InputIt last) {
         iterator nonConstPos = iterator(pos.get_node());
         for (auto it = first; it != last; ++it) {

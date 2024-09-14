@@ -9,6 +9,7 @@
 
 #include <functional>   // std::less
 #include <utility>      // std::move
+#include <iterator>     // std::input_iterator
 
 #include "vector.hpp"
 #include "algorithm/push_heap.hpp"
@@ -102,8 +103,7 @@ public:
      * \param first, last: Input iterators to the initial range.
      * \param comp: Comparison functor, optional.
      */
-    template <typename InputIt,
-              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    template <std::input_iterator InputIt>
     priority_queue(InputIt first, InputIt last, const value_compare& comp = value_compare()) 
         : m_container(first, last), m_comp(comp)
     {

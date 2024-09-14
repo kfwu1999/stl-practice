@@ -6,6 +6,9 @@
 #include <algorithm>      // std::sort
 #include <stdexcept>
 
+#include <forward_list>
+#include <list>
+
 #include "vector.hpp"
 
 
@@ -44,17 +47,37 @@ TEST(vectorTest, ConstructByCountOfCopies) {
  * Test Case: ConstructByRange
  */
 TEST(vectorTest, ConstructByRange) {
+    // Construct by raw array
     int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     mystl::vector<int> vec(arr, arr + 10);
     ASSERT_EQ(vec.size(), 10);
     for (size_t i = 0; i < 10; ++i) {
-        EXPECT_EQ(vec[i], i) << "Vectors differ at index " << i;
+        ASSERT_EQ(vec[i], i) << "Vectors differ at index " << i << " when construct by range of raw array";
     }
 
+    // Construct by mystl::vector (Random Access Iterator)
     mystl::vector<int> newVec(vec.begin(), vec.end());
     ASSERT_EQ(newVec.size(), 10);
     for (size_t i = 0; i < 10; ++i) {
-        EXPECT_EQ(newVec[i], i) << "Vectors differ at index " << i;
+        ASSERT_EQ(newVec[i], i) << "Vectors differ at index " << i << "when construct by range of mystl::vector";
+    }
+
+    // Construct by range of forward_list (Forward Iterator)
+    std::forward_list<int> flist = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    mystl::vector<int> vec_by_flist(flist.begin(), flist.end());
+    ASSERT_EQ(vec_by_flist.size(), 10);
+    std::forward_list<int>::iterator flit = flist.begin();
+    for (size_t i = 0; i < 10 && flit != flist.end(); ++i, ++flit) {
+        ASSERT_EQ(vec_by_flist[i], *flit) << "Vectors differ at index " << i << " when construct by range of std::forward_list";
+    }
+
+    // Construct by range of list (Bidirectional Iterator)
+    std::list<int> list = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    mystl::vector<int> vec_by_list(flist.begin(), flist.end());
+    ASSERT_EQ(vec_by_flist.size(), 10);
+    std::list<int>::iterator lit = list.begin();
+    for (size_t i = 0; i < 10 && lit != list.end(); ++i, ++lit) {
+        ASSERT_EQ(vec_by_flist[i], *lit) << "Vectors differ at index " << i << " when construct by range of std::list";
     }
 }
 

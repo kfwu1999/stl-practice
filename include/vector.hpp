@@ -20,7 +20,6 @@
 #include <initializer_list> // initializer_list
 #include <stdexcept>        // out_of_range
 #include <iterator>         // random_access_iterator_tag, distance
-#include <type_traits>      // enable_if, is_integral
 #include <memory>           // allocator
 
 
@@ -167,17 +166,16 @@ public:
      * \brief Constructs the container with the contents of the range [first,
      * last).
      *
-     * \note Enabled only if InputIt is an iterator. (using SFINAE)
+     * \note The `InputIt` must satisfy at least the requirements of `std::input_iterator`.
      *
      * \param first, last: iterators defining the range to be copied into the
      * vector, the `first` must be smaller than `last`.
      * \param alloc: allocator to use for all memory allocations of this container.
      */
-    template <typename InputIt, 
-              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    template <std::input_iterator InputIt>
     vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type())
         : m_alloc(alloc), 
-          m_size(last - first),
+          m_size(std::distance(first, last)),
           m_capacity(m_size),
           p_elem(std::allocator_traits<allocator_type>::allocate(m_alloc, m_capacity))
     {

@@ -114,12 +114,12 @@ private:
             return old;
         }
 
-        reference operator*() {
+        reference operator*() const {
             assert(p_ptr != nullptr && "Dereferencing an empty iterator.");
             return p_ptr->data;
         }
 
-        pointer operator->() {
+        pointer operator->() const {
             assert(p_ptr != nullptr && "Dereferencing an empty iterator.");
             return &(p_ptr->data);
         }
@@ -174,11 +174,12 @@ public:
     /**
      * \brief Constructs the container with the contents of the range `[first, last)`.
      *
+     * \note The `InputIt` must satisfy at least the requirements of `std::input_iterator`.
+     *
      * \param first: An iterator to the beginning of the range to copy.
      * \param last: An iterator to the end of the range to copy.
      */
-    template <typename InputIt,
-              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    template <std::input_iterator InputIt>
     list(InputIt first, InputIt last) 
         : m_size(0), p_end(new node)
     {
@@ -456,13 +457,14 @@ public:
     /**
      * \brief Inserts elements from the range [first, last) before the position specified by `pos`.
      *
+     * \note The `InputIt` must satisfy at least the requirements of `std::input_iterator`.
+     *
      * \param pos: An iterator specifying the position before which the elements will be inserted.     
      * \param first: An iterator to the beginning of the range to be inserted.
      * \param last: An iterator to the end of the range to be inserted (not inclusive).
      * \return An iterator pointing to the first element inserted, or `pos` if the range is empty.
      */
-    template <typename InputIt,
-              typename std::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr>
+    template <std::input_iterator InputIt>
     iterator insert(const_iterator pos, InputIt first, InputIt last) {
         // 
         iterator first_inserted = insert(pos, *first);

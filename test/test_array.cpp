@@ -2,9 +2,11 @@
  * \file test_array.cpp
  */
 
-#include "array.hpp"
 #include <stdexcept>
+
 #include <gtest/gtest.h>
+
+#include "array.hpp"
 
 /**
  * Test Case: DefaultConstructor
@@ -123,6 +125,13 @@ TEST(ArrayTest, ConstReverseIterators) {
     }
 }
 
+/**
+ * Test Case: Test for random_access_iterator concept in C++20
+ */
+TEST(ArrayTest, RandomAccessIteratorCategoryTest) {
+    constexpr bool is_random_access = std::random_access_iterator<mystl::array<int, 10>::iterator>;
+    EXPECT_TRUE(is_random_access) << "mystl::array::iterator must satisfy the random_access_iterator concept";
+}
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);

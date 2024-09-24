@@ -104,12 +104,12 @@ private:
             return old;
         }
 
-        reference operator*() {
+        reference operator*() const {
             assert(p_ptr != nullptr && "Dereferencing an empty iterator.");
             return p_ptr->data;
         }
 
-        pointer operator->() {
+        pointer operator->() const {
             assert(p_ptr != nullptr && "Dereferencing an empty iterator.");
             return &(p_ptr->data);
         }

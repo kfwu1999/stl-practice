@@ -1,9 +1,12 @@
 /**
  */
 
+#include <iterator>
 #include <stdexcept>
-#include <gtest/gtest.h>
 #include <utility>
+
+#include <gtest/gtest.h>
+
 #include "vector.hpp"
 #include "forward_list.hpp"
 
@@ -480,6 +483,15 @@ TEST(ForwardListTest, Sort) {
 
     // 
     EXPECT_EQ(list.size(), size_before_sort);
+}
+
+
+/**
+ * Test Case: Test for forward_iterator concept in C++20
+ */
+TEST(ForwardListTest, ForwardIteratorCategoryTest) {
+    constexpr bool is_forward = std::forward_iterator<mystl::forward_list<int>::iterator>;
+    EXPECT_TRUE(is_forward) << "mystl::forward_iterator::iterator must satisfy the forward_iterator_tag concept";
 }
 
 

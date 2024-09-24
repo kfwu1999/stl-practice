@@ -2,12 +2,13 @@
  * \file test_vector.cpp
  */
 
-#include <gtest/gtest.h>
 #include <algorithm>      // std::sort
+#include <iterator>
 #include <stdexcept>
-
 #include <forward_list>
 #include <list>
+
+#include <gtest/gtest.h>
 
 #include "vector.hpp"
 
@@ -557,6 +558,14 @@ TEST(vectorIteratorTest, ConstReverseIterators) {
     }
 }
 
+
+/**
+ * Test Case: Test for random_access_iterator concept in C++20
+ */
+TEST(vectorIteratorTest, RandomAccessIteratorCategoryTest) {
+    constexpr bool is_random_access = std::random_access_iterator<mystl::vector<int>::iterator>;
+    EXPECT_TRUE(is_random_access) << "mystl::vector::iterator must satisfy the random_access_iterator concept";
+}
 
 
 int main(int argc, char **argv) {

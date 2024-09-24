@@ -85,23 +85,16 @@ private:
         pointer   operator->()          const { return p_ptr; }
         reference operator[](int index) const { return *(p_ptr + index); }
 
-        vector_iterator_base& operator+=(int n) { p_ptr += n; return *this; }
-        vector_iterator_base& operator-=(int n) { p_ptr -= n; return *this; }
-        vector_iterator_base& operator++()      { ++p_ptr; return *this; }
-        vector_iterator_base& operator--()      { --p_ptr; return *this; }
-        vector_iterator_base operator++(int) { 
-            vector_iterator_base old(*this);   // remember original value
-            ++(*this);                    // post-increment
-            return old;                   // return original value
-        }
-        vector_iterator_base operator--(int) { 
-            vector_iterator_base old(*this);   // remember original value
-            --(*this);                    // post-decrement
-            return old;                   // return original value
-        }
+        vector_iterator_base& operator+=(difference_type n) { p_ptr += n; return *this; }
+        vector_iterator_base& operator-=(difference_type n) { p_ptr -= n; return *this; }
 
-        vector_iterator_base operator+(int n) const { vector_iterator_base temp(*this); return temp += n; }
-        vector_iterator_base operator-(int n) const { vector_iterator_base temp(*this); return temp -= n; }
+        vector_iterator_base& operator++()    { ++p_ptr; return *this; }
+        vector_iterator_base& operator--()    { --p_ptr; return *this; }
+        vector_iterator_base  operator++(int) { vector_iterator_base old(*this); ++(*this); return old; }
+        vector_iterator_base  operator--(int) { vector_iterator_base old(*this); --(*this); return old; }
+
+        vector_iterator_base operator+(difference_type n) const { vector_iterator_base temp(*this); return temp += n; }
+        vector_iterator_base operator-(difference_type n) const { vector_iterator_base temp(*this); return temp -= n; }
 
         difference_type operator-(const vector_iterator_base& other) const { return p_ptr - other.p_ptr; }
 
@@ -112,13 +105,14 @@ private:
         bool operator==(const vector_iterator_base& other) const { return p_ptr == other.p_ptr; }
         bool operator!=(const vector_iterator_base& other) const { return p_ptr != other.p_ptr; }
 
-        pointer base() const {
-            return p_ptr;
-        }
+        pointer base() const { return p_ptr; }
 
     private:
         pointer p_ptr;
     };
+
+    friend iterator operator+(difference_type n, const iterator& it) { return it + n; }
+    friend iterator operator-(difference_type n, const iterator& it) { return it + n; }
 
 
 public:

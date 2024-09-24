@@ -1,11 +1,13 @@
 /**
  */
-#include <gtest/gtest.h>
+
 #include <iterator>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <gtest/gtest.h>
 
 #include "list.hpp"
 
@@ -971,6 +973,15 @@ TEST(ListTest, Sort) {
     idx = sorted.size() - 1;
     for (auto rit = list.crbegin(); rit != list.crend(); ++rit)
         EXPECT_EQ(*rit, sorted[idx--]);
+}
+
+
+/**
+ * Test Case: Test for bidirectional_iterator concept in C++20
+ */
+TEST(ListTest, BidirectionalIteratorCategoryTest) {
+    constexpr bool is_bidirectional = std::bidirectional_iterator<mystl::list<int>::iterator>;
+    EXPECT_TRUE(is_bidirectional) << "mystl::list::iterator must satisfy the bidirectional_iterator concept";
 }
 
 

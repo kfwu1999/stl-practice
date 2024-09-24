@@ -107,7 +107,7 @@ private:
             return *this;
         }
 
-        list_iterator_base& operator--(int) {
+        list_iterator_base operator--(int) {
             assert(p_ptr != nullptr && "Attempting to increment an empty iterator");
             list_iterator_base old = *this;
             p_ptr = p_ptr->prev;

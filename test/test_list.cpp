@@ -17,13 +17,12 @@ TEST(ListTest, DefaultConstructorAndDestructor) {
     EXPECT_EQ(list.size(), 0);
 }
 
-
 TEST(ListTest, ConstructByCount) {
-    // 
-    int count = 10, value = 10;
+    //
+    int              count = 10, value = 10;
     mystl::list<int> list1(count, value);
 
-    // 
+    //
     for (auto it = list1.cbegin(); it != list1.cend(); ++it) {
         EXPECT_EQ(*it, value) << "Mismatch in forward traversal";
     }
@@ -32,10 +31,10 @@ TEST(ListTest, ConstructByCount) {
         EXPECT_EQ(*it, value) << "Mismatch in backward traversal";
     }
 
-    // 
+    //
     mystl::list<int> list2(count);
 
-    // 
+    //
     for (auto it = list2.cbegin(); it != list2.cend(); ++it) {
         EXPECT_EQ(*it, mystl::list<int>::value_type()) << "Mismatch in forward traversal";
     }
@@ -45,13 +44,12 @@ TEST(ListTest, ConstructByCount) {
     }
 }
 
-
 TEST(ListTest, ConstructByRange) {
-    // 
+    //
     const std::vector<int> expected = {1, 2, 3, 4, 5};
-    mystl::list<int> list1(expected.begin(), expected.end());
+    mystl::list<int>       list1(expected.begin(), expected.end());
 
-    // 
+    //
     int idx = 0;
     for (auto it = list1.cbegin(); it != list1.cend(); ++it, ++idx) {
         EXPECT_EQ(*it, expected[idx]) << "Mismatch in forward traversal";
@@ -63,42 +61,40 @@ TEST(ListTest, ConstructByRange) {
     }
 }
 
-
 TEST(ListTest, CopyConstructor) {
-    // 
+    //
     const std::vector<int> expected = {1, 2, 3, 4, 5};
-    mystl::list<int> ref_list(expected.begin(), expected.end());
+    mystl::list<int>       ref_list(expected.begin(), expected.end());
 
-    // 
+    //
     mystl::list<int> copied_list(ref_list);
     EXPECT_EQ(ref_list.size(), copied_list.size());
 
     // forward
-    for (auto rit = ref_list.begin(), cit = copied_list.begin();
-         cit != copied_list.end(); ++rit, ++cit) 
-    {
+    for (auto rit = ref_list.begin(), cit = copied_list.begin(); cit != copied_list.end();
+         ++rit, ++cit) {
         EXPECT_EQ(*rit, *cit) << "Mismatch in forward traversal";
         (*rit)++;
-        EXPECT_NE(*rit, *cit) << "Nodes in two lists should be independent after modification";
+        EXPECT_NE(*rit, *cit) << "Nodes in two lists should be independent "
+                                 "after modification";
     }
 
     // backward
-    for (auto rit = ref_list.rbegin(), cit = copied_list.rbegin();
-         cit != copied_list.rend(); ++rit, ++cit) 
-    {
+    for (auto rit = ref_list.rbegin(), cit = copied_list.rbegin(); cit != copied_list.rend();
+         ++rit, ++cit) {
         EXPECT_EQ(*rit - 1, *cit) << "Mismatch in backward traversal";
         (*rit)++;
-        EXPECT_NE(*rit, *cit) << "Nodes in two lists should be independent after modification";
+        EXPECT_NE(*rit, *cit) << "Nodes in two lists should be independent "
+                                 "after modification";
     }
 }
 
-
 TEST(ListTest, MoveConstructor) {
-    // 
+    //
     const std::vector<int> expected = {1, 2, 3, 4, 5};
-    mystl::list<int> ref_list(expected.begin(), expected.end());
+    mystl::list<int>       ref_list(expected.begin(), expected.end());
 
-    // 
+    //
     mystl::list<int> moved_list(ref_list);
     EXPECT_EQ(expected.size(), moved_list.size());
 
@@ -115,17 +111,16 @@ TEST(ListTest, MoveConstructor) {
     }
 }
 
-
 TEST(ListTest, InitializerConstructor) {
-    // 
+    //
     mystl::list<int> myList = {10, 20, 30, 40, 50};
 
-    // 
+    //
     EXPECT_EQ(myList.size(), 5);
 
-    // 
+    //
     std::vector<int> expected = {10, 20, 30, 40, 50};
-    int idx = 0;
+    int              idx      = 0;
     for (auto it = myList.begin(); it != myList.end(); ++it, ++idx) {
         EXPECT_EQ(*it, expected[idx]) << "Mismatch in forward traversal at index: " << idx;
     }
@@ -136,69 +131,68 @@ TEST(ListTest, InitializerConstructor) {
     }
 }
 
-
 /* Operators */
 TEST(ListTest, CopyAssignment) {
-    // 
+    //
     const std::vector<int> expected = {1, 2, 3, 4, 5};
-    mystl::list<int> ref_list(expected.begin(), expected.end());
+    mystl::list<int>       ref_list(expected.begin(), expected.end());
 
-    // 
+    //
     mystl::list<int> copied_list;
-    copied_list = ref_list;  // Copy assignment
+    copied_list = ref_list;   // Copy assignment
     EXPECT_EQ(ref_list.size(), copied_list.size());
 
-    // 
+    //
     auto rit = ref_list.begin(), cit = copied_list.begin();
     for (; cit != copied_list.end(); ++rit, ++cit) {
         EXPECT_EQ(*rit, *cit) << "Mismatch in forward traversal";
         (*rit)++;
-        EXPECT_NE(*rit, *cit) << "Nodes in two lists should be independent after modification";
+        EXPECT_NE(*rit, *cit) << "Nodes in two lists should be independent "
+                                 "after modification";
     }
 
-    // 
+    //
     auto rrit = ref_list.rbegin(), rcit = copied_list.rbegin();
     for (; rcit != copied_list.rend(); ++rrit, ++rcit) {
         EXPECT_EQ(*rrit, *rcit + 1) << "Mismatch in backward traversal";
         (*rrit)++;
-        EXPECT_NE(*rrit, *rcit) << "Nodes in two lists should be independent after modification";
+        EXPECT_NE(*rrit, *rcit) << "Nodes in two lists should be "
+                                   "independent after modification";
     }
 }
 
-
 TEST(ListTest, MoveAssignment) {
-    // 
+    //
     const std::vector<std::string> expected = {"1", "2", "3", "4", "5"};
-    mystl::list<std::string> ref_list(expected.begin(), expected.end());
+    mystl::list<std::string>       ref_list(expected.begin(), expected.end());
 
-    // 
+    //
     mystl::list<std::string> moved_list;
-    moved_list = std::move(ref_list);  // Move assignment
+    moved_list = std::move(ref_list);   // Move assignment
     EXPECT_EQ(expected.size(), moved_list.size());
 
-    // 
+    //
     int idx = 0;
     for (auto it = moved_list.begin(); it != moved_list.end(); ++it, ++idx) {
         EXPECT_EQ(*it, expected[idx]) << "Mismatch in forward traversal at index: " << idx;
     }
 
-    // 
+    //
     idx = expected.size() - 1;
     for (auto it = moved_list.rbegin(); it != moved_list.rend(); ++it, --idx) {
         EXPECT_EQ(*it, expected[idx]) << "Mismatch in backward traversal at index: " << idx;
     }
 }
 
-
 TEST(ListTest, InitializerListAssignment) {
-    // 
+    //
     mystl::list<int> myList;
-    myList = {10, 20, 30, 40, 50};  // Initializer list assignment
+    myList = {10, 20, 30, 40, 50};   // Initializer list assignment
     EXPECT_EQ(myList.size(), 5);
 
     // forward traversal
     std::vector<int> expected = {10, 20, 30, 40, 50};
-    int idx = 0;
+    int              idx      = 0;
     for (auto it = myList.begin(); it != myList.end(); ++it, ++idx) {
         EXPECT_EQ(*it, expected[idx]) << "Mismatch in forward traversal at index: " << idx;
     }
@@ -210,46 +204,41 @@ TEST(ListTest, InitializerListAssignment) {
     }
 }
 
-
-
 /* Element access */
 TEST(ListTest, Front) {
-    // 
+    //
     mystl::list<int> list;
 
-    // 
+    //
     EXPECT_THROW(list.front(), std::out_of_range);
 
-    // 
+    //
     list.push_front(1);
     EXPECT_EQ(list.front(), 1);
 }
 
-
 TEST(ListTest, Back) {
-    // 
+    //
     mystl::list<int> list;
 
-    // 
+    //
     EXPECT_THROW(list.back(), std::out_of_range);
 
-    // 
+    //
     list.push_back(1);
     EXPECT_EQ(list.back(), 1);
 }
 
-
 /* Capacity */
 TEST(ListTest, Empty) {
-    // 
+    //
     mystl::list<int> list;
     EXPECT_TRUE(list.empty());
 }
 
-
 /* Modifiers */
 TEST(ListTest, Insert) {
-    // 
+    //
     mystl::list<int> list;
 
     // Insert at the beginning when the list is empty
@@ -278,7 +267,7 @@ TEST(ListTest, Insert) {
 
     // Verify entire list content
     std::vector<int> expected = {10, 15, 20};
-    int index = 0;
+    int              index    = 0;
     for (auto fit = list.begin(); fit != list.end(); ++fit, ++index) {
         EXPECT_EQ(*fit, expected[index]) << "Mismatch in forward traversal at index: " << index;
     }
@@ -289,14 +278,13 @@ TEST(ListTest, Insert) {
     }
 }
 
-
 TEST(ListTest, InsertByMove) {
-    // 
+    //
     mystl::list<std::string> list;
 
     // Insert at the beginning when the list is empty
     std::string str1 = "10";
-    auto it = list.insert(list.cbegin(), std::move(str1));
+    auto        it   = list.insert(list.cbegin(), std::move(str1));
     EXPECT_EQ(list.size(), 1);
     EXPECT_EQ(*it, "10");
     EXPECT_EQ(list.front(), "10");
@@ -304,7 +292,7 @@ TEST(ListTest, InsertByMove) {
 
     // Insert at the end
     std::string str2 = "20";
-    it = list.insert(list.cend(), std::move(str2));
+    it               = list.insert(list.cend(), std::move(str2));
     EXPECT_EQ(list.size(), 2);
     EXPECT_EQ(*it, "20");
     EXPECT_EQ(list.front(), "10");
@@ -312,7 +300,7 @@ TEST(ListTest, InsertByMove) {
 
     // Insert at the middle
     std::string str3 = "15";
-    auto cit = list.cbegin();
+    auto        cit  = list.cbegin();
     std::advance(cit, 1);
     it = list.insert(cit, std::move(str3));
     EXPECT_EQ(list.size(), 3);
@@ -323,7 +311,7 @@ TEST(ListTest, InsertByMove) {
 
     // Verify entire list content
     std::vector<std::string> expected = {"10", "15", "20"};
-    int index = 0;
+    int                      index    = 0;
     for (auto fit = list.begin(); fit != list.end(); ++fit, ++index) {
         EXPECT_EQ(*fit, expected[index]) << "Mismatch in forward traversal at index: " << index;
     }
@@ -334,9 +322,8 @@ TEST(ListTest, InsertByMove) {
     }
 }
 
-
 TEST(ListTest, InsertByRange) {
-    // 
+    //
     mystl::list<int> list;
     list.insert(list.cend(), {30, 40, 50});
     std::vector<int> toInsert = {10, 20};
@@ -365,9 +352,8 @@ TEST(ListTest, InsertByRange) {
     EXPECT_EQ(std::vector<int>(list.begin(), list.end()), expected);
 }
 
-
 TEST(ListTest, InsertByInitializerList) {
-    // 
+    //
     mystl::list<int> list;
     list.insert(list.cend(), {30, 40, 50});
 
@@ -395,9 +381,8 @@ TEST(ListTest, InsertByInitializerList) {
     EXPECT_EQ(std::vector<int>(list.begin(), list.end()), expected);
 }
 
-
 TEST(ListTest, Emplace) {
-    // 
+    //
     mystl::list<std::pair<int, int>> list;
 
     // beginning
@@ -424,10 +409,8 @@ TEST(ListTest, Emplace) {
     EXPECT_EQ(*(++list.begin()), std::make_pair(20, 200));
     EXPECT_EQ(list.back(), std::make_pair(30, 300));
 
-    // 
-    std::vector<std::pair<int, int>> expected = {
-        {10, 100}, {20, 200}, {30, 300}
-    };
+    //
+    std::vector<std::pair<int, int>> expected = {{10, 100}, {20, 200}, {30, 300}};
 
     // forward travese
     int index = 0;
@@ -442,9 +425,8 @@ TEST(ListTest, Emplace) {
     }
 }
 
-
 TEST(ListTest, Erase) {
-    // 
+    //
     std::vector<int> expected = {10, 20, 30, 40, 50};
     mystl::list<int> list(expected.cbegin(), expected.cend());
 
@@ -466,27 +448,25 @@ TEST(ListTest, Erase) {
     EXPECT_THROW(list.erase(list.cend()), std::out_of_range);
 }
 
-
 TEST(ListTest, EraseByRange) {
-    // 
+    //
     std::vector<int> expected = {10, 20, 30, 40, 50};
     mystl::list<int> list(expected.cbegin(), expected.cend());
 
-    // 
+    //
     auto first = list.cbegin();
-    auto last = list.cbegin();
+    auto last  = list.cbegin();
     std::advance(first, 1);
     std::advance(last, 3);
     auto it = list.erase(first, last);
 
-    // 
+    //
     EXPECT_EQ(list.size(), 3);
     EXPECT_EQ(*it, 40);
 }
 
-
 TEST(ListTest, PushBack) {
-    // 
+    //
     mystl::list<int> list;
 
     // Test adding elements to the end of the list
@@ -507,7 +487,7 @@ TEST(ListTest, PushBack) {
 
     // test forward traversal
     const std::vector<int> expected = {1, 2, 3};
-    int i = 0;
+    int                    i        = 0;
     for (auto it = list.begin(); it != list.end(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in forward traversal at index: " << i;
     }
@@ -518,7 +498,6 @@ TEST(ListTest, PushBack) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in backward traversal at index: " << i;
     }
 }
-
 
 TEST(ListTest, PushBackByMove) {
     mystl::list<std::string> list;
@@ -537,7 +516,7 @@ TEST(ListTest, PushBackByMove) {
 
     // test forward traversal
     const std::vector<std::string> expected = {"1", "2"};
-    int i = 0;
+    int                            i        = 0;
     for (auto it = list.begin(); it != list.end(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in forward traversal at index: " << i;
     }
@@ -548,7 +527,6 @@ TEST(ListTest, PushBackByMove) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in backward traversal at index: " << i;
     }
 }
-
 
 TEST(ListTest, EmplaceBack) {
     mystl::list<std::pair<int, int>> list;
@@ -565,7 +543,7 @@ TEST(ListTest, EmplaceBack) {
 
     // test forward traversal
     const std::vector<std::pair<int, int>> expected = {{1, 2}, {2, 3}};
-    int i = 0;
+    int                                    i        = 0;
     for (auto it = list.begin(); it != list.end(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in forward traversal at index: " << i;
     }
@@ -576,7 +554,6 @@ TEST(ListTest, EmplaceBack) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in backward traversal at index: " << i;
     }
 }
-
 
 TEST(ListTest, PopBack) {
     mystl::list<int> list;
@@ -599,24 +576,23 @@ TEST(ListTest, PopBack) {
     EXPECT_THROW(list.pop_back(), std::out_of_range);
 }
 
-
 TEST(ListTest, PushFront) {
-    // 
+    //
     mystl::list<int> list;
 
-    // 
+    //
     list.push_front(1);
     EXPECT_EQ(list.size(), 1);
     EXPECT_EQ(list.front(), 1);
     EXPECT_EQ(list.back(), 1);
 
-    // 
+    //
     list.push_front(2);
     EXPECT_EQ(list.size(), 2);
     EXPECT_EQ(list.front(), 2);
     EXPECT_EQ(list.back(), 1);
 
-    // 
+    //
     list.push_front(3);
     EXPECT_EQ(list.size(), 3);
     EXPECT_EQ(list.front(), 3);
@@ -624,7 +600,7 @@ TEST(ListTest, PushFront) {
 
     // test forward traversal
     const std::vector<int> expected = {3, 2, 1};
-    int i = 0;
+    int                    i        = 0;
     for (auto it = list.begin(); it != list.end(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in forward traversal at index: " << i;
     }
@@ -636,19 +612,18 @@ TEST(ListTest, PushFront) {
     }
 }
 
-
 TEST(ListTest, PushFrontByMove) {
-    // 
+    //
     mystl::list<std::string> list;
 
-    // 
+    //
     std::string t1 = "1";
     list.push_front(std::move(t1));
     EXPECT_EQ(list.size(), 1);
     EXPECT_EQ(list.front(), "1");
     EXPECT_EQ(list.back(), "1");
 
-    // 
+    //
     std::string t2 = "2";
     list.push_front(std::move(t2));
     EXPECT_EQ(list.size(), 2);
@@ -657,7 +632,7 @@ TEST(ListTest, PushFrontByMove) {
 
     // test forward traversal
     const std::vector<std::string> expected = {"2", "1"};
-    int i = 0;
+    int                            i        = 0;
     for (auto it = list.begin(); it != list.end(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in forward traversal at index: " << i;
     }
@@ -669,18 +644,17 @@ TEST(ListTest, PushFrontByMove) {
     }
 }
 
-
 TEST(ListTest, EmplaceFront) {
     //
     mystl::list<std::pair<int, int>> list;
 
-    // 
+    //
     list.emplace_front(1, 2);
     EXPECT_EQ(list.size(), 1);
     EXPECT_EQ(list.front(), std::make_pair(1, 2));
     EXPECT_EQ(list.back(), std::make_pair(1, 2));
 
-    // 
+    //
     list.emplace_front(2, 3);
     EXPECT_EQ(list.size(), 2);
     EXPECT_EQ(list.front(), std::make_pair(2, 3));
@@ -688,7 +662,7 @@ TEST(ListTest, EmplaceFront) {
 
     // test forward traversal
     const std::vector<std::pair<int, int>> expected = {{2, 3}, {1, 2}};
-    int i = 0;
+    int                                    i        = 0;
     for (auto it = list.begin(); it != list.end(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]) << "Mismatch in forward traversal at index: " << i;
     }
@@ -700,18 +674,17 @@ TEST(ListTest, EmplaceFront) {
     }
 }
 
-
 TEST(ListTest, PopFront) {
     //
     mystl::list<int> list;
 
-    // 
+    //
     list.push_front(1);
     list.push_front(2);
     list.push_front(3);
     EXPECT_EQ(list.size(), 3);
 
-    // 
+    //
     list.pop_front();
     EXPECT_EQ(list.size(), 2);
     EXPECT_EQ(list.front(), 2);
@@ -726,19 +699,18 @@ TEST(ListTest, PopFront) {
     EXPECT_THROW(list.pop_front(), std::out_of_range);
 }
 
-
 TEST(ListTest, Resize) {
-    // 
+    //
     mystl::list<int> list;
 
-    // 
+    //
     list.resize(5, 10);
     EXPECT_EQ(list.size(), 5);
     for (const auto& item : list) {
         EXPECT_EQ(item, 10);
     }
 
-    // 
+    //
     list.resize(3);
     EXPECT_EQ(list.size(), 3);
     int count = 0;
@@ -748,18 +720,17 @@ TEST(ListTest, Resize) {
     }
     EXPECT_EQ(count, 3);
 
-    // 
+    //
     list.resize(0);
     EXPECT_TRUE(list.empty());
 
-    // 
+    //
     list.resize(2, 20);
     EXPECT_EQ(list.size(), 2);
     for (const auto& item : list) {
         EXPECT_EQ(item, 20);
     }
 }
-
 
 TEST(ListTest, Swap) {
     // Create two forward lists
@@ -771,30 +742,29 @@ TEST(ListTest, Swap) {
 
     // Check the contents of list1 after swap
     std::vector<int> expected_list1 = {4, 8, 7, 6, 3};
-    int i = 0;
+    int              i              = 0;
     for (auto it = list1.cbegin(); it != list1.cend(); ++it, ++i) {
         EXPECT_EQ(*it, expected_list1[i]);
     }
 
     // Check the contents of list2 after swap
     std::vector<int> expected_list2 = {1, 2, 3};
-    i = 0;
+    i                               = 0;
     for (auto it = list2.cbegin(); it != list2.cend(); ++it, ++i) {
         EXPECT_EQ(*it, expected_list2[i]);
     }
 }
 
-
 /* Operations */
 TEST(ListTest, Merge) {
-    // 
+    //
     std::vector<int> expected = {1, 2, 3, 4, 5, 6};
-    mystl::list<int> list1 = {1, 3, 5};
-    mystl::list<int> list2 = {2, 4, 6};
+    mystl::list<int> list1    = {1, 3, 5};
+    mystl::list<int> list2    = {2, 4, 6};
 
     list1.merge(list2);
 
-    // 
+    //
     EXPECT_EQ(list1.size(), expected.size());
 
     // forward
@@ -815,7 +785,6 @@ TEST(ListTest, Merge) {
     EXPECT_TRUE(list2.begin() == list2.end());
 }
 
-
 TEST(ListTest, Splice) {
     // Setup two lists
     mystl::list<int> list1 = {1, 2, 3};
@@ -823,7 +792,7 @@ TEST(ListTest, Splice) {
 
     // Iterator to the position after which elements will be inserted
     auto pos = list1.cbegin();
-    std::advance(pos, 1);  // Move iterator to '2'
+    std::advance(pos, 1);   // Move iterator to '2'
 
     // Perform splice
     list1.splice(pos, list2);
@@ -838,20 +807,19 @@ TEST(ListTest, Splice) {
     EXPECT_EQ(list2.size(), 0);
 }
 
-
 TEST(ListTest, Remove) {
-    // 
+    //
     mystl::list<int> list = {1, 2, 3, 2, 4, 2, 5};
 
-    // 
+    //
     list.remove(2);
 
-    // 
+    //
     std::vector<int> expected = {1, 3, 4, 5};
     std::vector<int> actual(list.begin(), list.end());
     EXPECT_EQ(actual, expected);
 
-    // 
+    //
     EXPECT_EQ(list.size(), 4);
 
     // no effect
@@ -859,16 +827,15 @@ TEST(ListTest, Remove) {
     EXPECT_EQ(list.size(), 4);
 }
 
-
 TEST(ListTest, Reverse) {
-    // 
+    //
     std::vector<int> expected = {5, 4, 3, 2, 1};
-    mystl::list<int> list = {1, 2, 3, 4, 5};
+    mystl::list<int> list     = {1, 2, 3, 4, 5};
 
-    // 
+    //
     list.reverse();
 
-    // 
+    //
     int idx = 0;
     for (auto it = list.cbegin(); it != list.cend(); ++it) {
         EXPECT_EQ(*it, expected[idx++]);
@@ -896,17 +863,16 @@ TEST(ListTest, Reverse) {
     }
 }
 
-
 TEST(ListTest, Unique) {
-    // 
-    mystl::list<int> list = {1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5};
+    //
+    mystl::list<int> list     = {1, 1, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5};
     std::vector<int> expected = {1, 2, 3, 4, 5};
 
-    // 
+    //
     list.unique();
     EXPECT_EQ(list.size(), 5);
 
-    // 
+    //
     int idx = 0;
     for (auto it = list.cbegin(); it != list.cend(); ++it) {
         EXPECT_EQ(*it, expected[idx++]);
@@ -922,7 +888,7 @@ TEST(ListTest, Unique) {
     list.unique();
     EXPECT_EQ(list.size(), 5);
 
-    // 
+    //
     idx = 0;
     for (auto it = list.cbegin(); it != list.cend(); ++it) {
         EXPECT_EQ(*it, expected[idx++]);
@@ -935,55 +901,49 @@ TEST(ListTest, Unique) {
     }
 }
 
-
 TEST(ListTest, Sort) {
-    // 
+    //
     std::vector<int> unsorted = {7, 3, 5, 1, 2, 6, 4, 1, 8};
     std::vector<int> sorted   = {1, 1, 2, 3, 4, 5, 6, 7, 8};
     mystl::list<int> list(unsorted.begin(), unsorted.end());
 
-    // 
+    //
     list.sort();
 
-    // 
+    //
     EXPECT_EQ(list.size(), sorted.size());
 
     // forward
     int idx = 0;
-    for (auto it = list.cbegin(); it != list.cend(); ++it)
-        EXPECT_EQ(*it, sorted[idx++]);
-    
+    for (auto it = list.cbegin(); it != list.cend(); ++it) EXPECT_EQ(*it, sorted[idx++]);
+
     // backward
     idx = sorted.size() - 1;
-    for (auto rit = list.crbegin(); rit != list.crend(); ++rit)
-        EXPECT_EQ(*rit, sorted[idx--]);
+    for (auto rit = list.crbegin(); rit != list.crend(); ++rit) EXPECT_EQ(*rit, sorted[idx--]);
 
     // Sort a sorted list again
     list.sort();
 
-    // 
+    //
     EXPECT_EQ(list.size(), sorted.size());
 
     // forward
     idx = 0;
-    for (auto it = list.cbegin(); it != list.cend(); ++it)
-        EXPECT_EQ(*it, sorted[idx++]);
-    
+    for (auto it = list.cbegin(); it != list.cend(); ++it) EXPECT_EQ(*it, sorted[idx++]);
+
     // backward
     idx = sorted.size() - 1;
-    for (auto rit = list.crbegin(); rit != list.crend(); ++rit)
-        EXPECT_EQ(*rit, sorted[idx--]);
+    for (auto rit = list.crbegin(); rit != list.crend(); ++rit) EXPECT_EQ(*rit, sorted[idx--]);
 }
-
 
 /**
  * Test Case: Test for bidirectional_iterator concept in C++20
  */
 TEST(ListTest, BidirectionalIteratorCategoryTest) {
     constexpr bool is_bidirectional = std::bidirectional_iterator<mystl::list<int>::iterator>;
-    EXPECT_TRUE(is_bidirectional) << "mystl::list::iterator must satisfy the bidirectional_iterator concept";
+    EXPECT_TRUE(is_bidirectional) << "mystl::list::iterator must satisfy the "
+                                     "bidirectional_iterator concept";
 }
-
 
 /**/
 int main(int argc, char** argv) {

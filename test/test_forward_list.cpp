@@ -7,9 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include "vector.hpp"
 #include "forward_list.hpp"
-
+#include "vector.hpp"
 
 /* Constructors and Destructors */
 TEST(ForwardListTest, DefaultConstructorAndDestructor) {
@@ -17,27 +16,25 @@ TEST(ForwardListTest, DefaultConstructorAndDestructor) {
     EXPECT_EQ(list.size(), 0);
 }
 
-
 TEST(ForwardListTest, ConstructorWithCount) {
-    // 
+    //
     mystl::forward_list<int> list(5, 1);
 
-    // 
+    //
     EXPECT_EQ(list.size(), 5);
     for (auto it = list.cbegin(); it != list.cend(); ++it) {
         EXPECT_EQ(*it, 1);
     }
 }
 
-
 TEST(ForwardListTest, ConstructorWithRange) {
-    // 
+    //
     mystl::vector<int> vec = {1, 2, 3, 4, 5};
 
-    // 
+    //
     mystl::forward_list<int> list(vec.begin(), vec.end());
 
-    // 
+    //
     EXPECT_EQ(list.size(), vec.size());
     auto vec_it = vec.begin();
     for (auto it = list.cbegin(); it != list.cend(); ++it, ++vec_it) {
@@ -45,15 +42,14 @@ TEST(ForwardListTest, ConstructorWithRange) {
     }
 }
 
-
 TEST(ForwardListTest, CopyConstructor) {
-    // 
+    //
     mystl::forward_list<int> list;
     list.push_front(3);
     list.push_front(2);
     list.push_front(1);
 
-    // 
+    //
     mystl::forward_list<int> copied_list(list);
     EXPECT_EQ(list.front(), 1);
     EXPECT_EQ(list.size(), 3);
@@ -61,15 +57,15 @@ TEST(ForwardListTest, CopyConstructor) {
     EXPECT_EQ(copied_list.size(), 3);
 
     // the nodes in two list should be independent
-    for (auto it = list.begin(), copied_it = copied_list.begin(); it != list.end(); ++it, ++copied_it) {
+    for (auto it = list.begin(), copied_it = copied_list.begin(); it != list.end();
+         ++it, ++copied_it) {
         *it += 1;
         EXPECT_NE(*it, *copied_it);
     }
 }
 
-
 TEST(ForwardListTest, MoveConstructor) {
-    // 
+    //
     mystl::forward_list<int> list;
     list.push_front(3);
     list.push_front(2);
@@ -80,14 +76,12 @@ TEST(ForwardListTest, MoveConstructor) {
     EXPECT_EQ(moved_list.size(), 3);
 }
 
-
 TEST(ForwardListTest, InitializerConstructor) {
     mystl::forward_list<int> list = {1, 2, 3};
 
     EXPECT_EQ(list.size(), 3);
     EXPECT_EQ(list.front(), 1);
 }
-
 
 /* Operators */
 TEST(ForwardListTest, AssignmentOperators) {
@@ -117,19 +111,17 @@ TEST(ForwardListTest, AssignmentOperators) {
     EXPECT_EQ(7, list5.front());
 }
 
-
 TEST(ForwardListTest, Front) {
-    // 
+    //
     mystl::forward_list<int> list;
 
-    // 
+    //
     EXPECT_THROW(list.front(), std::out_of_range);
 
-    // 
+    //
     list.push_front(5);
     EXPECT_EQ(list.front(), 5);
 }
-
 
 /* Iterators */
 TEST(ForwardListIteratorTest, Increment) {
@@ -142,7 +134,6 @@ TEST(ForwardListIteratorTest, Increment) {
     EXPECT_EQ(*(it++), 2);
     EXPECT_EQ(*it, 3);
 }
-
 
 TEST(ForwardListIteratorTest, Iteration) {
     mystl::forward_list<int> list;
@@ -157,7 +148,6 @@ TEST(ForwardListIteratorTest, Iteration) {
     }
 }
 
-
 TEST(ForwardListIteratorTest, IterationByConst) {
     mystl::forward_list<int> list;
     list.push_front(5);
@@ -171,41 +161,38 @@ TEST(ForwardListIteratorTest, IterationByConst) {
     }
 }
 
-
 /* Modifiers */
 TEST(ForwardListTest, InsertAfter) {
-    // 
+    //
     mystl::forward_list<int> list;
 
-    // 
+    //
     EXPECT_THROW(list.insert_after(list.cbegin(), 1), std::logic_error);
     list.push_front(1);
 
-    // 
+    //
     list.insert_after(list.cbegin(), 3);
     auto it = list.insert_after(list.cbegin(), 2);
     EXPECT_EQ(*it, 2);
 
-    // 
+    //
     int i = 1;
-    for (auto it = list.cbegin(); it != list.cend(); ++it)
-        EXPECT_EQ(*it, i++);
+    for (auto it = list.cbegin(); it != list.cend(); ++it) EXPECT_EQ(*it, i++);
     EXPECT_EQ(list.size(), 3);
 }
 
-
 TEST(ForwardListTest, InsertAfterWithCount) {
-    // 
+    //
     mystl::forward_list<int> list;
 
-    // 
+    //
     EXPECT_THROW(list.insert_after(list.cbegin(), 1, 0), std::logic_error);
 
     // insert with `0` count
     list.insert_after(list.cbefore_begin(), 0, 1);
     EXPECT_EQ(list.size(), 0);
 
-    // 
+    //
     list.insert_after(list.cbefore_begin(), 3, 1);
     EXPECT_EQ(list.size(), 3);
     while (!list.empty()) {
@@ -214,102 +201,101 @@ TEST(ForwardListTest, InsertAfterWithCount) {
     }
 }
 
-
 TEST(ForwardListTest, InsertAfterRange) {
-    // 
+    //
     mystl::forward_list<int> list = {1, 2, 3};
 
-    // 
+    //
     mystl::vector<int> range = {4, 5, 6};
     list.insert_after(list.cbegin(), range.begin(), range.end());
 
-    // 
+    //
     std::vector<int> expected = {1, 4, 5, 6, 2, 3};
-    int i = 0;
+    int              i        = 0;
     for (auto it = list.cbegin(); it != list.cend(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]);
     }
 }
-
 
 TEST(ForwardListTest, InsertAfterInitializerList) {
-    // 
+    //
     mystl::forward_list<int> list = {1, 2, 3};
 
-    // 
+    //
     list.insert_after(list.cbegin(), {4, 5, 6});
 
-    // 
+    //
     mystl::vector<int> expected = {1, 4, 5, 6, 2, 3};
-    int i = 0;
+    int                i        = 0;
     for (auto it = list.cbegin(); it != list.cend(); ++it, ++i) {
         EXPECT_EQ(*it, expected[i]);
     }
 }
 
-
 TEST(ForwardListTest, EmplaceAfter) {
-    // 
+    //
     mystl::forward_list<std::pair<int, int>> list;
     EXPECT_THROW(list.emplace_after(list.cbegin(), 1, 1), std::logic_error);
 
-    // 
+    //
     list.emplace_after(list.cbefore_begin(), 1, -1);   // sentinel -> (1,-1)
     list.emplace_after(list.cbegin(), 3, -3);          // sentinel -> (1,-1) -> (3,-3)
-    list.emplace_after(list.cbegin(), 2, -2);          // sentinel -> (1,-1) -> (2,-2) -> (3,-3)
+    list.emplace_after(list.cbegin(), 2,
+                       -2);   // sentinel -> (1,-1) -> (2,-2) -> (3,-3)
     EXPECT_EQ(list.size(), 3);
 
-    // 
+    //
     int i = 1;
     for (auto it = list.cbegin(); it != list.cend(); ++it, ++i)
         EXPECT_EQ(*it, std::make_pair(i, -i));
 }
 
-
 TEST(ForwardListTest, EraseAfter) {
-    // 
+    //
     mystl::forward_list<int> list;
 
-    // 
-    EXPECT_THROW(list.erase_after(list.cbegin()), std::logic_error);   // list.cbegin() is empty
+    //
+    EXPECT_THROW(list.erase_after(list.cbegin()),
+                 std::logic_error);                // list.cbegin() is empty
     list.emplace_after(list.cbefore_begin(), 1);   // sentinel -> 1
 
-    // 
-    EXPECT_THROW(list.erase_after(list.cbegin()), std::logic_error);   // next of list.cbegin() is empty
-    list.emplace_after(list.cbegin(), 3);          // sentinel -> 1 -> 3
-    list.emplace_after(list.cbegin(), 2);          // sentinel -> 1 -> 2 -> 3
+    //
+    EXPECT_THROW(list.erase_after(list.cbegin()),
+                 std::logic_error);         // next of list.cbegin() is empty
+    list.emplace_after(list.cbegin(), 3);   // sentinel -> 1 -> 3
+    list.emplace_after(list.cbegin(), 2);   // sentinel -> 1 -> 2 -> 3
 
-    // 
+    //
     auto it = list.erase_after(list.cbefore_begin());
     EXPECT_EQ(list.front(), 2);
     EXPECT_EQ(*it, 2);
     EXPECT_EQ(list.size(), 2);
 }
 
-
 TEST(ForwardListTest, EraseAfterRange) {
-    // 
+    //
     mystl::forward_list<int> list;
 
-    // 
-    EXPECT_THROW(list.erase_after(list.cbegin(), list.cend()), std::logic_error);   // Empty range
+    //
+    EXPECT_THROW(list.erase_after(list.cbegin(), list.cend()),
+                 std::logic_error);                // Empty range
     list.emplace_after(list.cbefore_begin(), 1);   // sentinel -> 1
 
-    // 
-    EXPECT_THROW(list.erase_after(list.cbegin(), list.cend()), std::logic_error);   // Range contains only one element
-    list.emplace_after(list.cbegin(), 3);          // sentinel -> 1 -> 3
-    list.emplace_after(list.cbegin(), 2);          // sentinel -> 1 -> 2 -> 3
+    //
+    EXPECT_THROW(list.erase_after(list.cbegin(), list.cend()),
+                 std::logic_error);         // Range contains only one element
+    list.emplace_after(list.cbegin(), 3);   // sentinel -> 1 -> 3
+    list.emplace_after(list.cbegin(), 2);   // sentinel -> 1 -> 2 -> 3
 
-    // 
+    //
     auto first = list.cbegin();
-    auto last = first;
+    auto last  = first;
     std::advance(last, 2);
     auto it = list.erase_after(first, last);
     EXPECT_EQ(list.front(), 1);
     EXPECT_EQ(*it, 3);
     EXPECT_EQ(list.size(), 2);
 }
-
 
 TEST(ForwardListTest, PushFront) {
     mystl::forward_list<int> list;
@@ -324,7 +310,6 @@ TEST(ForwardListTest, PushFront) {
     EXPECT_EQ(list.size(), 3);
 }
 
-
 TEST(ForwardListTest, EmplaceFront) {
     mystl::forward_list<std::pair<int, int>> list;
     list.emplace_front(1, -1);
@@ -334,7 +319,6 @@ TEST(ForwardListTest, EmplaceFront) {
     EXPECT_EQ(list.front(), std::make_pair(2, -2));
     EXPECT_EQ(list.size(), 2);
 }
-
 
 TEST(ForwardListTest, PopFront) {
     mystl::forward_list<int> list;
@@ -352,12 +336,11 @@ TEST(ForwardListTest, PopFront) {
     EXPECT_THROW(list.pop_front(), std::out_of_range);
 }
 
-
 TEST(ForwardListTest, Resize) {
-    // 
+    //
     mystl::forward_list<int> list;
 
-    // 
+    //
     list.resize(5, 1);
     EXPECT_EQ(list.size(), 5);
     int i = 0;
@@ -378,7 +361,6 @@ TEST(ForwardListTest, Resize) {
     EXPECT_EQ(list.size(), 2);
 }
 
-
 TEST(ForwardListTest, Swap) {
     // Create two forward lists
     mystl::forward_list<int> list1 = {1, 2, 3};
@@ -389,111 +371,106 @@ TEST(ForwardListTest, Swap) {
 
     // Check the contents of list1 after swap
     std::vector<int> expected_list1 = {4, 8, 7, 6, 3};
-    int i = 0;
+    int              i              = 0;
     for (auto it = list1.cbegin(); it != list1.cend(); ++it, ++i) {
         EXPECT_EQ(*it, expected_list1[i]);
     }
 
     // Check the contents of list2 after swap
     std::vector<int> expected_list2 = {1, 2, 3};
-    i = 0;
+    i                               = 0;
     for (auto it = list2.cbegin(); it != list2.cend(); ++it, ++i) {
         EXPECT_EQ(*it, expected_list2[i]);
     }
 }
 
-
 /* Operations */
 TEST(ForwardListTest, Merge) {
-    // 
+    //
     mystl::forward_list<int> list1 = {1, 3, 5};
     mystl::forward_list<int> list2 = {2, 4, 6};
 
-    // 
+    //
     list1.merge(list2);
 
-    // 
+    //
     EXPECT_EQ(list1.size(), 6);
 
-    // 
+    //
     std::vector<int> expected = {1, 2, 3, 4, 5, 6};
-    int i = 0;
+    int              i        = 0;
     for (auto value : list1) {
         EXPECT_EQ(value, expected[i++]);
     }
 
-    // 
+    //
     EXPECT_TRUE(list2.empty());
     EXPECT_EQ(list2.size(), 0);
 }
 
-
 TEST(ForwardListTest, SpliceAfter) {
-    // 
+    //
     mystl::forward_list<int> list1 = {1, 2, 3};
     mystl::forward_list<int> list2 = {4, 5, 6};
 
-    // 
+    //
     auto it = list1.cbegin();
     std::advance(it, 1);
     list1.splice_after(it, list2);
 
-    // 
+    //
     std::vector<int> expected = {1, 2, 4, 5, 6, 3};
-    int i = 0;
+    int              i        = 0;
     for (auto value : list1) {
         EXPECT_EQ(value, expected[i++]);
     }
 
-    // 
+    //
     EXPECT_TRUE(list2.empty());
     EXPECT_EQ(list2.size(), 0);
 }
 
-
 TEST(ForwardListTest, Unique) {
-    // 
+    //
     mystl::forward_list<int> list = {1, 1, 2, 2, 3, 3, 3, 4, 4, 5};
 
-    // 
+    //
     list.unique();
 
-    // 
+    //
     std::vector<int> expected = {1, 2, 3, 4, 5};
-    int i = 0;
+    int              i        = 0;
     for (auto value : list) {
         EXPECT_EQ(value, expected[i++]);
     }
     EXPECT_EQ(list.size(), expected.size());
 }
 
-
 TEST(ForwardListTest, Sort) {
-    // 
-    mystl::forward_list<int> list = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-    std::size_t size_before_sort = list.size();
+    //
+    mystl::forward_list<int> list             = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
+    std::size_t              size_before_sort = list.size();
     list.sort();
 
-    // 
+    //
     std::vector<int> sorted = {1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9};
-    int i = 0;
+    int              i      = 0;
     for (auto value : list) {
         EXPECT_EQ(value, sorted[i++]);
     }
 
-    // 
+    //
     EXPECT_EQ(list.size(), size_before_sort);
 }
-
 
 /**
  * Test Case: Test for forward_iterator concept in C++20
  */
 TEST(ForwardListTest, ForwardIteratorCategoryTest) {
     constexpr bool is_forward = std::forward_iterator<mystl::forward_list<int>::iterator>;
-    EXPECT_TRUE(is_forward) << "mystl::forward_iterator::iterator must satisfy the forward_iterator_tag concept";
+    EXPECT_TRUE(is_forward) << "mystl::forward_iterator::iterator must satisfy "
+                               "the forward_iterator_tag concept";
 }
-
 
 /**/
 int main(int argc, char** argv) {

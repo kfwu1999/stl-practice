@@ -7,17 +7,14 @@
 #ifndef FORWARD_LIST_HPP_
 #define FORWARD_LIST_HPP_
 
-
-#include <iterator>         // forward_iterator_tag
-#include <utility>          // move, forward
-#include <cstddef>          // size_t
-#include <initializer_list> // initializer_list
-#include <cassert>          // assert
-#include <stdexcept>        // out_of_range, logic_error
+#include <cassert>            // assert
+#include <cstddef>            // size_t
+#include <initializer_list>   // initializer_list
+#include <iterator>           // forward_iterator_tag
+#include <stdexcept>          // out_of_range, logic_error
+#include <utility>            // move, forward
 
 namespace mystl {
-
-
 
 /**
  */
@@ -41,38 +38,34 @@ public:
 
     using node_pointer    = node*;
 
-
 private:
     /**
      */
     struct node {
         node() = default;
 
-        node(const _T& data, node* next = nullptr) 
-            : data(data), next(next) {}
+        node(const _T& data, node* next = nullptr) : data(data), next(next) {}
 
-        node(_T&& data, node* next = nullptr) 
-            : data(std::move(data)), next(next) {}
+        node(_T&& data, node* next = nullptr) : data(std::move(data)), next(next) {}
 
         template <typename... Args>
-        node(Args&&... args)
-            : data(std::forward<Args> (args)...), next(nullptr) {}
+        node(Args&&... args) : data(std::forward<Args>(args)...), next(nullptr) {}
 
         /**
          */
-        value_type   data = value_type();      // default-inserted value
+        value_type   data = value_type();   // default-inserted value
         node_pointer next = nullptr;
     };
 
-
-/* Iterators */
 private:
     /**
-     * \brief Iterator for the mystl::list class template that supports forward iterator operations.
+     * \brief Iterator for the mystl::list class template that supports forward
+     * iterator operations.
      *
      * \tparam _Iter_val Type of the value that the iterator points to.
      * \tparam _Iter_ptr Type of the pointer to the value (const or non-const).
-     * \tparam _Iter_ref Type of the reference to the value (const or non-const).
+     * \tparam _Iter_ref Type of the reference to the value (const or
+     * non-const).
      */
     template <typename _Iter_val, typename _Iter_ptr, typename _Iter_ref>
     class forward_iterator_base {
@@ -100,7 +93,7 @@ private:
         forward_iterator_base operator++(int) {
             assert(p_ptr != nullptr && "Attempting to increment an empty iterator");
             forward_iterator_base old = *this;
-            p_ptr = p_ptr->next;
+            p_ptr                     = p_ptr->next;
             return old;
         }
 
@@ -129,55 +122,47 @@ private:
         node_pointer p_ptr;
     };
 
-
-/* Constructor and Destructor*/
 public:
     /**
      * Default constructor
      */
-    forward_list()
-        : m_size(0), p_before_head(new node)
-    {
-    }
+    forward_list() : m_size(0), p_before_head(new node) {}
 
     /**
-     * \brief Constructs the container with count copies of elements with value value.
+     * \brief Constructs the container with count copies of elements with value
+     * value.
      */
     explicit forward_list(size_type count, const_reference value = value_type())
-        : m_size(0), p_before_head(new node)
-    {
+        : m_size(0), p_before_head(new node) {
         insert_after(cbefore_begin(), count, value);
     }
 
     /**
-     * \brief Constructs the container with the contents of the range `[first, last)`.
+     * \brief Constructs the container with the contents of the range `[first,
+     * last)`.
      *
-     * \note The `InputIt` must satisfy at least the requirements of `std::input_iterator`.
+     * \note The `InputIt` must satisfy at least the requirements of
+     * `std::input_iterator`.
      *
      * \param first, last: iterators defining the range to be copied.
      */
     template <std::input_iterator InputIt>
-    forward_list(InputIt first, InputIt last)
-        : m_size(0), p_before_head(new node)
-    {
+    forward_list(InputIt first, InputIt last) : m_size(0), p_before_head(new node) {
         insert_after(cbefore_begin(), first, last);
     }
 
     /**
      * Copy constructor
      */
-    forward_list(const forward_list& other) 
-        : m_size(0), p_before_head(new node)
-    {
-        // 
+    forward_list(const forward_list& other) : m_size(0), p_before_head(new node) {
+        //
         node_pointer curr = p_before_head;
 
-        // 
-        for (node_pointer other_curr = other.p_before_head->next;
-             other_curr != nullptr; other_curr = other_curr->next)
-        {
+        //
+        for (node_pointer other_curr = other.p_before_head->next; other_curr != nullptr;
+             other_curr              = other_curr->next) {
             curr->next = new node(other_curr->data);
-            curr = curr->next;
+            curr       = curr->next;
             ++m_size;
         }
     }
@@ -186,18 +171,15 @@ public:
      * Move constructor
      */
     forward_list(forward_list&& other) noexcept
-        : m_size(other.m_size), p_before_head(std::move(other.p_before_head))
-    {
-        other.m_size = 0;
+        : m_size(other.m_size), p_before_head(std::move(other.p_before_head)) {
+        other.m_size        = 0;
         other.p_before_head = new node;   // reset other.p_before_head to a valid empty state
     }
 
     /**
      * \brief Construct by initializer.
      */
-    forward_list(std::initializer_list<value_type> initList) 
-        : m_size(0), p_before_head(new node)
-    {
+    forward_list(std::initializer_list<value_type> initList) : m_size(0), p_before_head(new node) {
         insert_after(cbefore_begin(), initList);
     }
 
@@ -209,32 +191,29 @@ public:
         delete p_before_head;
     }
 
-
-/* Operators */
 public:
     /**
      * Copy assignment operator
      */
     forward_list& operator=(const forward_list& other) {
         if (this != &other) {
-            // 
+            //
             clear();
             m_size = 0;
 
-            // 
+            //
             node_pointer curr = p_before_head;
 
-            // 
-            for (node_pointer other_curr = other.p_before_head->next;
-                    other_curr != nullptr; other_curr = other_curr->next)
-            {
+            //
+            for (node_pointer other_curr = other.p_before_head->next; other_curr != nullptr;
+                 other_curr              = other_curr->next) {
                 curr->next = new node(other_curr->data);
-                curr = curr->next;
+                curr       = curr->next;
                 ++m_size;
             }
         }
 
-        // 
+        //
         return *this;
     }
 
@@ -243,44 +222,43 @@ public:
      */
     forward_list& operator=(forward_list&& other) noexcept {
         if (this != &other) {
-            // 
+            //
             clear();
             delete p_before_head;
 
-            // 
-            m_size = other.m_size;
+            //
+            m_size        = other.m_size;
             p_before_head = std::move(other.p_before_head);
 
-            // 
-            other.m_size = 0;
-            other.p_before_head = new node;   // reset other.p_before_head to a valid empty state
+            //
+            other.m_size        = 0;
+            other.p_before_head = new node;   // reset other.p_before_head
+                                              // to a valid empty state
         }
 
-        // 
+        //
         return *this;
     }
 
     /**
      */
     forward_list& operator=(std::initializer_list<value_type> initList) {
-        // 
+        //
         clear();
         m_size = 0;
 
-        // 
+        //
         node_pointer curr = p_before_head;
         for (auto& elem : initList) {
             curr->next = new node(elem);
-            curr = curr->next;
+            curr       = curr->next;
             ++m_size;
         }
 
-        // 
+        //
         return *this;
     }
 
-
-/* Element access */
 public:
     /**
      */
@@ -298,26 +276,29 @@ public:
         return p_before_head->next->data;
     }
 
-
-/* Iterators */
 public:
     /**
      */
-    iterator        before_begin()       noexcept { return iterator(p_before_head); }
+    // clang-format off
+    iterator       before_begin()        noexcept { return iterator(p_before_head); }
     const_iterator cbefore_begin() const noexcept { return const_iterator(p_before_head); }
+    // clang-format on
 
     /**
      */
-    iterator        begin()       noexcept { return iterator(p_before_head->next); }
+    // clang-format off
+    iterator       begin()        noexcept { return iterator(p_before_head->next); }
     const_iterator cbegin() const noexcept { return const_iterator(p_before_head->next); };
+    // clang-format on
 
     /**
      */
-    iterator        end()       noexcept { return iterator(nullptr); };
+    // clang-format off
+    iterator       end()        noexcept { return iterator(nullptr); };
     const_iterator cend() const noexcept { return const_iterator(nullptr); };
+    // clang-format on
 
-
-/* Capacity */
+    /* Capacity */
 public:
     /**
      * \brief Checks whether the container is empty
@@ -335,14 +316,13 @@ public:
      */
     size_type size() const noexcept { return m_size; }
 
-
-/* Modifiers */
+    /* Modifiers */
 public:
     /**
      * \brief Clear elements in container.
      */
     void clear() noexcept {
-        // 
+        //
         node_pointer curr = p_before_head->next;
         while (curr != nullptr) {
             node_pointer next = curr->next;
@@ -350,54 +330,57 @@ public:
             curr = next;
         }
 
-        // 
+        //
         p_before_head->next = nullptr;
-        m_size = 0;
+        m_size              = 0;
     }
-
 
     /**
      * \brief inserts elements after an element
      */
     iterator insert_after(const_iterator pos, const_reference val) {
-        // 
+        //
         if (pos == cend()) {
-            throw std::logic_error("mystl::insert_after: Attempting to insert after the end iterator");
+            throw std::logic_error(
+                "mystl::insert_after: Attempting to insert after the end "
+                "iterator");
         }
 
-        // 
-        node_pointer curr = pos.get_node();
+        //
+        node_pointer curr    = pos.get_node();
         node_pointer newNode = new node(val, curr->next);
-        curr->next = newNode;
+        curr->next           = newNode;
         ++m_size;
 
         return iterator(newNode);
     }
-
 
     iterator insert_after(const_iterator pos, value_type&& val) {
-        // 
+        //
         if (pos == cend()) {
-            throw std::logic_error("mystl::insert_after: Attempting to insert after the end iterator");
+            throw std::logic_error(
+                "mystl::insert_after: Attempting to insert after the end "
+                "iterator");
         }
 
-        // 
-        node_pointer curr = pos.get_node();
+        //
+        node_pointer curr    = pos.get_node();
         node_pointer newNode = new node(std::move(val), curr->next);
-        curr->next = newNode;
+        curr->next           = newNode;
         ++m_size;
 
         return iterator(newNode);
     }
 
-
     iterator insert_after(const_iterator pos, size_type count, const_reference value) {
-        // 
+        //
         if (pos == cend()) {
-            throw std::logic_error("mystl::insert_after: Attempting to insert after the end iterator");
+            throw std::logic_error(
+                "mystl::insert_after: Attempting to insert after the end "
+                "iterator");
         }
 
-        // 
+        //
         iterator it = iterator(pos.get_node());
         while (count--) {
             it = insert_after(const_iterator(it.get_node()), value);
@@ -405,7 +388,6 @@ public:
 
         return it;
     }
-
 
     template <std::input_iterator InputIt>
     iterator insert_after(const_iterator pos, InputIt first, InputIt last) {
@@ -416,78 +398,76 @@ public:
         return nonConstPos;
     }
 
-
     iterator insert_after(const_iterator pos, std::initializer_list<value_type> iList) {
         return insert_after(pos, iList.begin(), iList.end());
     }
-
 
     /**
      * \brief constructs elements in-place after an element
      */
     template <typename... Args>
     iterator emplace_after(const_iterator pos, Args&&... args) {
-        // 
+        //
         if (pos == cend()) {
-            throw std::logic_error("mystl::emplace_after: Attempting to emplace after the end iterator");
+            throw std::logic_error(
+                "mystl::emplace_after: Attempting to emplace after the end "
+                "iterator");
         }
 
-        // 
-        node_pointer curr = pos.get_node();
+        //
+        node_pointer curr    = pos.get_node();
         node_pointer newNode = new node(std::forward<Args>(args)...);
-        newNode->next = curr->next;
-        curr->next = newNode;
+        newNode->next        = curr->next;
+        curr->next           = newNode;
         ++m_size;
 
         return iterator(newNode);
     }
 
-
     /**
      * \brief erases an element after an element
      */
     iterator erase_after(const_iterator pos) {
-        // 
+        //
         node_pointer curr = pos.get_node();
 
-        // 
+        //
         if (curr == nullptr)
             throw std::logic_error("erase_after(): Invalid iterator");
         else if (curr->next == nullptr)
             throw std::logic_error("erase_after(): no element after pos");
 
-        // 
+        //
         node_pointer node_to_delete = curr->next;
-        curr->next = curr->next->next;
+        curr->next                  = curr->next->next;
         delete node_to_delete;
 
         --m_size;
 
-        // 
+        //
         return iterator(curr->next);
     }
 
     iterator erase_after(const_iterator first, const_iterator last) {
-        // 
+        //
         node_pointer curr = first.get_node();
 
-        // 
+        //
         if (curr == nullptr)
             throw std::logic_error("erase_after(): Invalid iterator");
         else if (curr->next == nullptr)
             throw std::logic_error("erase_after(): no element after pos");
 
-        // 
+        //
         while (curr->next != nullptr && curr->next != last.get_node()) {
             node_pointer node_to_delete = curr->next;
-            curr->next = curr->next->next;
+            curr->next                  = curr->next->next;
             delete node_to_delete;
             --m_size;
         }
 
         return iterator(curr->next);
     }
-
 
     /**
      * \brief inserts an element to the beginning
@@ -502,18 +482,16 @@ public:
         ++m_size;
     }
 
-
     /**
      * \brief constructs an element in-place at the beginning
      */
     template <typename... Args>
     void emplace_front(Args&&... args) {
         node_pointer originalFirstNode = p_before_head->next;
-        p_before_head->next = new node(std::forward<Args>(args)...);
-        p_before_head->next->next = originalFirstNode;
+        p_before_head->next            = new node(std::forward<Args>(args)...);
+        p_before_head->next->next      = originalFirstNode;
         ++m_size;
     }
-
 
     /**
      * \brief removes the first element
@@ -523,32 +501,27 @@ public:
             throw std::out_of_range("pop_front(): List is empty");
         }
         node_pointer node_to_delete = p_before_head->next;
-        p_before_head->next = node_to_delete->next;
+        p_before_head->next         = node_to_delete->next;
         delete node_to_delete;
         --m_size;
     }
 
-
     /**
      * \brief changes the number of elements stored
      */
-    void resize(size_type count) {
-        resize(count, value_type());
-    }
+    void resize(size_type count) { resize(count, value_type()); }
 
     void resize(size_type count, const_reference value) {
-        if (m_size < count) {                                   // append copies of value
+        if (m_size < count) {   // append copies of value
             iterator it = before_begin();
             std::advance(it, m_size);
             insert_after(const_iterator(it.get_node()), (count - m_size), value);
-        }
-        else if (m_size > count) {                              // reduce to the first `count` elements
+        } else if (m_size > count) {   // reduce to the first `count` elements
             iterator it = before_begin();
             std::advance(it, count);
             erase_after(const_iterator(it.get_node()), cend());
         }
     }
-
 
     /**
      * \brief swaps the contents
@@ -558,8 +531,6 @@ public:
         std::swap(p_before_head, other.p_before_head);
     }
 
-
-/* Operations */
 public:
     /**
      * \brief Merge two sorted list
@@ -570,49 +541,49 @@ public:
      * \note Undefined behavior if the `this` or `other` is not sorted
      */
     void merge(forward_list& other) {
-        // This function does nothing if `other` refers to the same object as `this`
+        // This function does nothing if `other` refers to the same object as
+        // `this`
         if (this == &other)
             return;
 
-        // 
+        //
         node_pointer dummy = new node;
-        node_pointer tail = dummy;
+        node_pointer tail  = dummy;
         node_pointer curr1 = p_before_head->next;
         node_pointer curr2 = other.p_before_head->next;
 
-        // 
+        //
         while (curr1 != nullptr && curr2 != nullptr) {
             if (curr1->data < curr2->data) {
                 tail->next = curr1;
-                curr1 = curr1->next;
+                curr1      = curr1->next;
             } else {
                 tail->next = curr2;
-                curr2 = curr2->next;
+                curr2      = curr2->next;
             }
             tail = tail->next;
         }
 
-        // 
+        //
         if (curr1 != nullptr)
             tail->next = curr1;
         if (curr2 != nullptr)
             tail->next = curr2;
 
-        // 
-        p_before_head->next = dummy->next;
-        m_size += other.m_size;
+        //
+        p_before_head->next        = dummy->next;
+        m_size                    += other.m_size;
 
-        other.p_before_head->next = nullptr;
-        other.m_size = 0;
+        other.p_before_head->next  = nullptr;
+        other.m_size               = 0;
 
         delete dummy;
     }
 
-
     /**
      * \brief Move elements from another forward_list
      *
-     * Moves elements from antoher forward_list to `this`. 
+     * Moves elements from antoher forward_list to `this`.
      *
      * \param pos: element after which the content will be inserted.
      * \param other: anothe rcontainer to move the content from
@@ -620,31 +591,31 @@ public:
      * \note No iterators or references become invalidated.
      */
     void splice_after(const_iterator pos, forward_list& other) {
-        // 
+        //
         if (pos == cbefore_begin() || pos == cend())
-            throw std::logic_error("splice_after(): Attempting to splice after end or before_begin.");
+            throw std::logic_error(
+                "splice_after(): Attempting to splice after end or "
+                "before_begin.");
 
-        // 
+        //
         node_pointer pos_ptr = pos.get_node();
 
-        // 
+        //
         if (pos_ptr->next != nullptr) {
             // Find the last node in the other list
             node_pointer other_tail = other.p_before_head->next;
-            while (other_tail->next != nullptr)
-                other_tail = other_tail->next;
+            while (other_tail->next != nullptr) other_tail = other_tail->next;
             other_tail->next = pos_ptr->next;
         }
 
-        // 
-        pos_ptr->next = other.p_before_head->next;
-        m_size += other.m_size;
+        //
+        pos_ptr->next  = other.p_before_head->next;
+        m_size        += other.m_size;
 
-        // 
+        //
         other.p_before_head->next = nullptr;
-        other.m_size = 0;
+        other.m_size              = 0;
     }
-
 
     /**
      * \brief Removes elements satisfying specific criteria
@@ -652,11 +623,11 @@ public:
      * \param value: valud of the elements to remove
      */
     void remove(const_reference value) {
-        // 
+        //
         node_pointer prev = p_before_head;
         node_pointer curr = p_before_head->next;
 
-        // 
+        //
         while (curr != nullptr) {
             if (curr->data == value) {
                 prev->next = curr->next;
@@ -674,20 +645,20 @@ public:
      * \brief Reverse the order of the elements
      */
     void reverse() noexcept {
-        // 
+        //
         node_pointer prev = nullptr;
         node_pointer curr = p_before_head->next;
         node_pointer next = nullptr;
 
-        // 
+        //
         while (curr != nullptr) {
-            next = curr->next;
+            next       = curr->next;
             curr->next = prev;
-            prev = curr;
-            curr = next;
+            prev       = curr;
+            curr       = next;
         }
 
-        // 
+        //
         p_before_head->next = prev;
     }
 
@@ -695,13 +666,14 @@ public:
      * \brief Removes consecutive duplicate elements
      */
     void unique() {
-        // 
+        //
         node_pointer prev = p_before_head;
         node_pointer curr = p_before_head->next;
 
-        // 
+        //
         while (curr != nullptr) {
-            // skip at beginning because the `data` of `prev` is undefined
+            // skip at beginning because the `data` of `prev` is
+            // undefined
             if (prev != p_before_head && prev->data == curr->data) {
                 prev->next = curr->next;
                 delete curr;
@@ -719,42 +691,38 @@ public:
      *
      * \note use merge sort
      */
-    void sort() {
-        p_before_head->next = merge_sort(p_before_head->next);
-    }
-
+    void sort() { p_before_head->next = merge_sort(p_before_head->next); }
 
 private:
     /**
      * \brief Merge sort
      */
     node_pointer merge_sort(node_pointer head) {
-        // 
+        //
         if (head == nullptr || head->next == nullptr)
             return head;
 
         //
-        node_pointer mid = get_middle_node(head);
+        node_pointer mid      = get_middle_node(head);
         node_pointer mid_next = mid->next;
-        mid->next = nullptr;
+        mid->next             = nullptr;
 
-        // 
-        node_pointer left_part = merge_sort(head);
+        //
+        node_pointer left_part  = merge_sort(head);
         node_pointer right_part = merge_sort(mid_next);
 
         return merge(left_part, right_part);
     }
 
-
     /**
      * \brief Get middle node for merge sort
      */
     node_pointer get_middle_node(node_pointer head) {
-        // 
+        //
         node_pointer fast = head;
         node_pointer slow = head;
 
-        // 
+        //
         while (fast->next != nullptr && fast->next->next != nullptr) {
             fast = fast->next->next;
             slow = slow->next;
@@ -763,7 +731,6 @@ private:
         return slow;
     }
 
-
     /**
      * \brief merge for merge_sort
      *
@@ -771,41 +738,39 @@ private:
      * \param head2: head of sorted list 2
      */
     node_pointer merge(node_pointer head1, node_pointer head2) {
-        // 
+        //
         node_pointer dummy = new node;
-        node_pointer tail = dummy;
+        node_pointer tail  = dummy;
 
-        // 
+        //
         while (head1 != nullptr && head2 != nullptr) {
             if (head1->data < head2->data) {
                 tail->next = head1;
-                head1 = head1->next;
+                head1      = head1->next;
             } else {
                 tail->next = head2;
-                head2 = head2->next;
+                head2      = head2->next;
             }
             tail = tail->next;
         }
 
-        // 
+        //
         if (head1 != nullptr)
             tail->next = head1;
         if (head2 != nullptr)
             tail->next = head2;
 
-        // 
+        //
         node_pointer head = dummy->next;
         delete dummy;
 
         return head;
     }
 
-
 private:
     size_type m_size;
     node*     p_before_head;   // sentinel node
 };
-
 
 /**
  * \brief Specializes the std::swap algorithm for mystl::forward_list.
@@ -815,9 +780,6 @@ void swap(forward_list<T>& lhs, forward_list<T>& rhs) {
     lhs.swap(rhs);
 }
 
+}   // namespace mystl
 
-
-}
-
-
-#endif // FORWARD_LIST_HPP_
+#endif   // FORWARD_LIST_HPP_

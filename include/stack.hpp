@@ -11,7 +11,6 @@
 
 namespace mystl {
 
-
 /**
  * \brief stack
  *
@@ -27,7 +26,6 @@ public:
     using reference       = typename _Container::reference;
     using const_reference = typename _Container::const_reference;
 
-/* Constructors and Destructors */
 public:
     /**
      * \brief Default contructor
@@ -42,31 +40,25 @@ public:
     /**
      * \brief Copy constructor
      */
-    stack(const stack& other) {
-        m_container = other.m_container;
-    }
+    stack(const stack& other) { m_container = other.m_container; }
 
     /**
      * \brief Move constructor
      */
-    stack(stack&& other) noexcept {
-        m_container = std::move(other.m_container);
-    }
+    stack(stack&& other) noexcept { m_container = std::move(other.m_container); }
 
     /**
      * \brief Destructor
      */
-    ~stack() {
-    }
+    ~stack() {}
 
-/* Operators */
 public:
     /**
      * \brief Copy assignment operator
      */
-    stack& operator=(const stack& other) { 
+    stack& operator=(const stack& other) {
         if (this != &other)
-            m_container = other.m_container; 
+            m_container = other.m_container;
         return *this;
     }
 
@@ -75,11 +67,10 @@ public:
      */
     stack& operator=(stack&& other) noexcept {
         if (this != &other)
-            m_container = std::move(other.m_container); 
+            m_container = std::move(other.m_container);
         return *this;
     }
 
-/* Element access */
 public:
     /**
      * \brief Accesses the top element.
@@ -91,7 +82,6 @@ public:
      */
     const_reference top() const { return m_container.back(); }
 
-/* Capacity */
 public:
     /**
      * \brief Checks whether the container adaptor is empty.
@@ -103,7 +93,6 @@ public:
      */
     size_type size() const { return m_container.size(); }
 
-/* Modifiers */
 public:
     /**
      * \brief inserts element at the top
@@ -118,8 +107,10 @@ public:
     /**
      * \brief Constructs elements in-place at the top.
      */
-    template <typename ...Args>
-    void emplace(Args&&... args) { m_container.emplace_back(std::forward<Args>(args)...); }
+    template <typename... Args>
+    void emplace(Args&&... args) {
+        m_container.emplace_back(std::forward<Args>(args)...);
+    }
 
     /**
      * \brief Removes the top elements.
@@ -135,7 +126,6 @@ private:
     container_type m_container;
 };
 
-
 /**
  * \brief Specializes the std::swap algorithm for std::stack.
  */
@@ -144,8 +134,6 @@ void swap(stack<_T, _Container>& lhs, stack<_T, _Container>& rhs) {
     lhs.swap(rhs);
 }
 
+}   // namespace mystl
 
-} // namespace mystl::
-
-
-#endif // STACK_HPP_
+#endif   // STACK_HPP_

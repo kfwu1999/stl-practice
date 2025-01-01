@@ -1,0 +1,79 @@
+# 
+BasedOnStyle: Google
+IndentWidth: 4
+ContinuationIndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+
+# Formatting for braces
+BraceWrapping:
+    AfterCaseLabel: false
+    AfterClass: false
+    AfterControlStatement: Never
+    AfterEnum: false
+    AfterFunction: false
+    AfterNamespace: false
+    AfterStruct: false
+    AfterUnion: false
+    AfterExternBlock: false
+    BeforeCatch: false
+    BeforeElse: false
+    BeforeLambdaBody: false
+    BeforeWhile: false
+    IndentBraces: true
+    SplitEmptyFunction: false
+    SplitEmptyRecord: false
+    SplitEmptyNamespace: true
+
+# Line wrapping
+ColumnLimit: 100
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+
+# Pointer and reference alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Include sorting
+SortIncludes: true
+IncludeBlocks: Preserve
+
+# Spaces
+SpacesBeforeTrailingComments: 3
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+
+# Function and parameter formatting
+AlignTrailingComments: true
+
+# Special cases
+BreakBeforeBraces: Attach
+BreakConstructorInitializers: BeforeComma
+BinPackParameters: true
+AlwaysBreakTemplateDeclarations: Yes
+AlignConsecutiveAssignments:
+    Enabled: true
+    AcrossEmptyLines: true
+    AcrossComments: false
+    AlignCompound: true
+    PadOperators: true
+AlignConsecutiveDeclarations:
+    Enabled: true
+    AcrossEmptyLines: false
+    AcrossComments: false
+AlignConsecutiveMacros:
+    Enabled: true
+    AcrossEmptyLines: false
+    AcrossComments: false
+AlignConsecutiveBitFields:
+    Enabled: true
+    AcrossEmptyLines: true
+    AcrossComments: false
+QualifierAlignment: Leave
+
+# Other formatting options
+IndentCaseLabels: true
+ReflowComments: true
+Cpp11BracedListStyle: true

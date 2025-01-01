@@ -7,12 +7,9 @@
 #ifndef QUEUE_HPP_
 #define QUEUE_HPP_
 
-
 #include "list.hpp"
 
-
 namespace mystl {
-
 
 /**
  * \class queue
@@ -29,7 +26,6 @@ public:
     using reference       = typename _Container::reference;
     using const_reference = typename _Container::const_reference;
 
-/* Constructors and Destructors */
 public:
     /**
      * \brief Default contructor
@@ -44,31 +40,25 @@ public:
     /**
      * \brief Copy constructor
      */
-    queue(const queue& other) {
-        m_container = other.m_container;
-    }
+    queue(const queue& other) { m_container = other.m_container; }
 
     /**
      * \brief Move constructor
      */
-    queue(queue&& other) noexcept {
-        m_container = std::move(other.m_container);
-    }
+    queue(queue&& other) noexcept { m_container = std::move(other.m_container); }
 
     /**
      * \brief Destructor
      */
-    ~queue() {
-    }
+    ~queue() {}
 
-/* Operators */
 public:
     /**
      * \brief Copy assignment operator
      */
     queue& operator=(const queue& other) {
         if (this != &other)
-            m_container = other.m_container; 
+            m_container = other.m_container;
         return *this;
     }
 
@@ -77,11 +67,10 @@ public:
      */
     queue& operator=(queue&& other) noexcept {
         if (this != &other)
-            m_container = std::move(other.m_container); 
+            m_container = std::move(other.m_container);
         return *this;
     }
 
-/* Element access */
 public:
     /**
      * \brief Access the first element.
@@ -103,7 +92,6 @@ public:
      */
     const_reference back() const { return m_container.back(); }
 
-/* Capacity */
 public:
     /**
      * \brief Checks whether the container adaptor is empty.
@@ -115,7 +103,6 @@ public:
      */
     size_type size() const { return m_container.size(); }
 
-/* Modifiers */
 public:
     /**
      * \brief Inserts element at the end.
@@ -129,8 +116,10 @@ public:
 
     /**
      */
-    template <typename ...Args>
-    void emplace(Args&&... args) { m_container.emplace_back(std::forward<Args>(args)...); }
+    template <typename... Args>
+    void emplace(Args&&... args) {
+        m_container.emplace_back(std::forward<Args>(args)...);
+    }
 
     /**
      * \brief Removes the first element.
@@ -146,7 +135,6 @@ private:
     container_type m_container;
 };
 
-
 /**
  * \brief Specializes the std::swap algorithm for std::queue.
  */
@@ -155,8 +143,6 @@ void swap(queue<_T, _Container>& lhs, queue<_T, _Container>& rhs) {
     lhs.swap(rhs);
 }
 
+}   // namespace mystl
 
-} // namespace mystl::
-
-
-#endif // QUEUE_HPP_
+#endif   // QUEUE_HPP_

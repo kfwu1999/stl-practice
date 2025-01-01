@@ -51,7 +51,7 @@ TEST(ArrayTest, FrontAndBack) {
  */
 TEST(ArrayTest, DataAccess) {
     mystl::array<int, 5> arr = {1, 2, 3, 4, 5};
-    int* ptr = arr.data();
+    int*                 ptr = arr.data();
     EXPECT_EQ(ptr[0], 1);
     EXPECT_EQ(ptr[4], 5);
 }
@@ -85,7 +85,7 @@ TEST(ArrayTest, Swap) {
  */
 TEST(ArrayTest, Iterators) {
     mystl::array<int, 5> arr = {1, 2, 3, 4, 5};
-    int i = 1;
+    int                  i   = 1;
     for (auto it = arr.begin(); it != arr.end(); ++it, ++i) {
         EXPECT_EQ(*it, i);
     }
@@ -96,19 +96,18 @@ TEST(ArrayTest, Iterators) {
  */
 TEST(ArrayTest, ConstIterators) {
     const mystl::array<int, 5> arr = {1, 2, 3, 4, 5};
-    int i = 1;
+    int                        i   = 1;
     for (auto it = arr.cbegin(); it != arr.cend(); ++it, ++i) {
         EXPECT_EQ(*it, i);
     }
 }
-
 
 /**
  * Test Case: ReverseIterators
  */
 TEST(ArrayTest, ReverseIterators) {
     mystl::array<int, 5> arr = {1, 2, 3, 4, 5};
-    int i = 5;
+    int                  i   = 5;
     for (auto it = arr.rbegin(); it != arr.rend(); ++it, --i) {
         EXPECT_EQ(*it, i);
     }
@@ -119,7 +118,7 @@ TEST(ArrayTest, ReverseIterators) {
  */
 TEST(ArrayTest, ConstReverseIterators) {
     const mystl::array<int, 5> arr = {1, 2, 3, 4, 5};
-    int i = 5;
+    int                        i   = 5;
     for (auto it = arr.crbegin(); it != arr.crend(); ++it, --i) {
         EXPECT_EQ(*it, i);
     }
@@ -130,7 +129,8 @@ TEST(ArrayTest, ConstReverseIterators) {
  */
 TEST(ArrayTest, RandomAccessIteratorCategoryTest) {
     constexpr bool is_random_access = std::random_access_iterator<mystl::array<int, 10>::iterator>;
-    EXPECT_TRUE(is_random_access) << "mystl::array::iterator must satisfy the random_access_iterator concept";
+    EXPECT_TRUE(is_random_access) << "mystl::array::iterator must satisfy the "
+                                     "random_access_iterator concept";
 }
 
 int main(int argc, char** argv) {

@@ -2,16 +2,15 @@
  * \file test_vector.cpp
  */
 
-#include <algorithm>      // std::sort
-#include <iterator>
-#include <stdexcept>
+#include <algorithm>   // std::sort
 #include <forward_list>
+#include <iterator>
 #include <list>
+#include <stdexcept>
 
 #include <gtest/gtest.h>
 
 #include "vector.hpp"
-
 
 /**
  * Test Case: DefaultConstructor
@@ -20,7 +19,6 @@ TEST(vectorTest, DefaultConstructor) {
     mystl::vector<int> vec;
     EXPECT_EQ(0, vec.size());
 }
-
 
 /**
  * Test Case: ConstructByCountOfCopies
@@ -43,45 +41,47 @@ TEST(vectorTest, ConstructByCountOfCopies) {
     }
 }
 
-
 /**
  * Test Case: ConstructByRange
  */
 TEST(vectorTest, ConstructByRange) {
     // Construct by raw array
-    int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int                arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     mystl::vector<int> vec(arr, arr + 10);
     ASSERT_EQ(vec.size(), 10);
     for (size_t i = 0; i < 10; ++i) {
-        ASSERT_EQ(vec[i], i) << "Vectors differ at index " << i << " when construct by range of raw array";
+        ASSERT_EQ(vec[i], i) << "Vectors differ at index " << i
+                             << " when construct by range of raw array";
     }
 
     // Construct by mystl::vector (Random Access Iterator)
     mystl::vector<int> newVec(vec.begin(), vec.end());
     ASSERT_EQ(newVec.size(), 10);
     for (size_t i = 0; i < 10; ++i) {
-        ASSERT_EQ(newVec[i], i) << "Vectors differ at index " << i << "when construct by range of mystl::vector";
+        ASSERT_EQ(newVec[i], i) << "Vectors differ at index " << i
+                                << "when construct by range of mystl::vector";
     }
 
     // Construct by range of forward_list (Forward Iterator)
     std::forward_list<int> flist = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    mystl::vector<int> vec_by_flist(flist.begin(), flist.end());
+    mystl::vector<int>     vec_by_flist(flist.begin(), flist.end());
     ASSERT_EQ(vec_by_flist.size(), 10);
     std::forward_list<int>::iterator flit = flist.begin();
     for (size_t i = 0; i < 10 && flit != flist.end(); ++i, ++flit) {
-        ASSERT_EQ(vec_by_flist[i], *flit) << "Vectors differ at index " << i << " when construct by range of std::forward_list";
+        ASSERT_EQ(vec_by_flist[i], *flit)
+            << "Vectors differ at index " << i << " when construct by range of std::forward_list";
     }
 
     // Construct by range of list (Bidirectional Iterator)
-    std::list<int> list = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::list<int>     list = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     mystl::vector<int> vec_by_list(flist.begin(), flist.end());
     ASSERT_EQ(vec_by_flist.size(), 10);
     std::list<int>::iterator lit = list.begin();
     for (size_t i = 0; i < 10 && lit != list.end(); ++i, ++lit) {
-        ASSERT_EQ(vec_by_flist[i], *lit) << "Vectors differ at index " << i << " when construct by range of std::list";
+        ASSERT_EQ(vec_by_flist[i], *lit)
+            << "Vectors differ at index " << i << " when construct by range of std::list";
     }
 }
-
 
 /**
  * Test Case: Copy constructor
@@ -96,7 +96,6 @@ TEST(vectorTest, CopyConstructor) {
     }
 }
 
-
 /**
  * Test Case: Move constructor
  */
@@ -110,11 +109,10 @@ TEST(vectorTest, MoveConstructor) {
     EXPECT_EQ(moved[1], 2);
     EXPECT_EQ(moved[2], 3);
 
-    // 
+    //
     EXPECT_TRUE(original.empty());
     EXPECT_EQ(original.capacity(), 0);
 }
-
 
 /**
  * Test Case: Initializer constructor
@@ -127,7 +125,6 @@ TEST(vectorTest, InitializerConstructor) {
     EXPECT_EQ(vec[1], 1);
     EXPECT_EQ(vec[2], 2);
 }
-
 
 /**
  * Test Case: CopyAssignment
@@ -147,7 +144,6 @@ TEST(vectorTest, CopyAssignment) {
     EXPECT_EQ(original[0], 1) << "Original vector modified after copy assignment.";
 }
 
-
 /**
  * Test Case: MoveAssignment
  */
@@ -166,7 +162,6 @@ TEST(vectorTest, MoveAssignment) {
     EXPECT_EQ(original.capacity(), 0);
 }
 
-
 /**
  * Test Case: AtThrowsOutOfRange
  */
@@ -175,7 +170,6 @@ TEST(vectorTest, AtThrowsOutOfRange) {
     EXPECT_EQ(vec.at(0), 1);
     EXPECT_THROW(vec.at(3), std::out_of_range);
 }
-
 
 /**
  */
@@ -186,7 +180,6 @@ TEST(vectorTest, Front) {
     EXPECT_EQ(vec.front(), *vec.cbegin());
 }
 
-
 /**
  */
 TEST(vectorTest, Back) {
@@ -195,7 +188,6 @@ TEST(vectorTest, Back) {
     vec.push_back(1);
     EXPECT_EQ(vec.back(), *std::prev(vec.cend()));
 }
-
 
 /**
  */
@@ -206,14 +198,12 @@ TEST(vectorTest, Reserve) {
     EXPECT_EQ(vec.size(), 0) << "The size of vector changed after reserve";
 }
 
-
 /**
  * Test Case: ShrinkToFit
  */
 TEST(vectorTest, ShrinkToFit) {
     mystl::vector<int> vec;
-    for (int i = 0; i < 100; ++i)
-        vec.push_back(i);
+    for (int i = 0; i < 100; ++i) vec.push_back(i);
     int valBefore = vec[99];
     vec.shrink_to_fit();
     int valAfter = vec[99];
@@ -222,11 +212,10 @@ TEST(vectorTest, ShrinkToFit) {
     EXPECT_EQ(valBefore, valAfter) << "The value of last element changed after shrink_to_fit";
 }
 
-
 /**
  */
 TEST(vectorTest, Erase) {
-    // 
+    //
     mystl::vector<int> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     vec.erase(vec.cbegin());
@@ -240,7 +229,6 @@ TEST(vectorTest, Erase) {
     EXPECT_EQ(vec[2], 6);
     EXPECT_THROW(vec.erase(vec.cbegin() + 2, vec.cbegin() + 10), std::out_of_range);
 }
-
 
 TEST(vectorTest, Emplace) {
     mystl::vector<int> vec = {1, 2, 4, 5};
@@ -264,7 +252,6 @@ TEST(vectorTest, Emplace) {
     EXPECT_EQ(vec[6], 6);
 }
 
-
 TEST(vectorTest, Insert) {
     mystl::vector<int> vec = {1, 2, 3, 5};
 
@@ -287,18 +274,16 @@ TEST(vectorTest, Insert) {
     EXPECT_EQ(vec[6], 6);
 }
 
-
 /**
  * Test Case: PushBackLValue
  */
 TEST(vectorTest, PushBackLValue) {
     mystl::vector<int> vec;
-    int value = 42;
+    int                value = 42;
     vec.push_back(value);
     EXPECT_EQ(1, vec.size());
-    EXPECT_EQ(42, vec[0]); 
+    EXPECT_EQ(42, vec[0]);
 }
-
 
 /**
  * Test Case: PushBackRValue
@@ -310,7 +295,6 @@ TEST(vectorTest, PushBackRValue) {
     EXPECT_EQ(42, vec[0]);
 }
 
-
 /**
  * Test Case: EmplaceBack
  */
@@ -320,7 +304,6 @@ TEST(vectorTest, EmplaceBack) {
     EXPECT_EQ(1, vec.size());
     EXPECT_EQ(std::make_pair(1, 2), vec[0]);
 }
-
 
 /**
  * Test Case: pop_back
@@ -334,13 +317,11 @@ TEST(vectorTest, pop_back) {
     EXPECT_THROW(vec.pop_back(), std::length_error);
 }
 
-
 /**
  */
 TEST(vectorTest, Resize) {
     mystl::vector<int> vec;
-    for (std::size_t i = 0; i < 20; ++i)
-        vec.push_back(i);
+    for (std::size_t i = 0; i < 20; ++i) vec.push_back(i);
 
     vec.resize(25);
     ASSERT_EQ(vec.size(), 25);
@@ -354,17 +335,16 @@ TEST(vectorTest, Resize) {
     ASSERT_EQ(vec.size(), 10);
 }
 
-
 /**
  */
 TEST(vectorTest, SwapVectors) {
-    // 
+    //
     mystl::vector<int> vec1 = {0, 1, 2, 3};
     mystl::vector<int> vec2 = {4, 5, 6};
 
     // Record original sizes and capacities
-    auto size1 = vec1.size();
-    auto size2 = vec2.size();
+    auto size1     = vec1.size();
+    auto size2     = vec2.size();
     auto capacity1 = vec1.capacity();
     auto capacity2 = vec2.capacity();
 
@@ -392,61 +372,57 @@ TEST(vectorTest, SwapVectors) {
     EXPECT_THROW(vec2.at(4), std::out_of_range);
 }
 
-
 /**
  * Test Case: CorrectlyManagesResourcesWithDynamicAllocation
  *
  * Purpose:
- * This test is designed to verify the vector class's capability to safely destruct objects 
- * with dynamically allocated memory, and have been moved into the vector using push_back.
+ * This test is designed to verify the vector class's capability to safely
+ * destruct objects with dynamically allocated memory, and have been moved into
+ * the vector using push_back.
  *
  * Note: Failure of this test may result in a "pointer being freed was not
  * allocated" error message, indicating improper management of dynamic memory.
  */
 TEST(vectorTest, CorrectlyManagesResourcesWithDynamicAllocation) {
-    // 
+    //
     class MyClass {
     public:
-        MyClass() 
-            : p_int(new int[5]) {}
+        MyClass() : p_int(new int[5]) {}
 
         MyClass(const MyClass& other) = delete;
 
         MyClass(MyClass&& other) {
-            p_int = other.p_int;
+            p_int       = other.p_int;
             other.p_int = nullptr;
         }
 
         MyClass& operator=(const MyClass& other) = delete;
 
         MyClass& operator=(MyClass&& other) {
-            p_int = other.p_int;
+            p_int       = other.p_int;
             other.p_int = nullptr;
             return *this;
         }
 
-        ~MyClass() {
-            delete[] p_int;
-        }
+        ~MyClass() { delete[] p_int; }
 
     private:
         int* p_int = nullptr;
     };
 
-    // 
+    //
     mystl::vector<MyClass> vec;
     vec.push_back(MyClass());
 }
 
-
 /**
  * Test Case: SortUsingStdSort
- * 
+ *
  * This test checks if mystl::vector can be used with the std::sort algorithm
  * to correctly sort its elements.
  */
 TEST(VectorTest, SortUsingStdSort) {
-    // 
+    //
     mystl::vector<int> vec = {4, 4, 8, 7, 6, 3, 3};
 
     // Using std::sort to sort the vector
@@ -458,16 +434,15 @@ TEST(VectorTest, SortUsingStdSort) {
     }
 }
 
-
 /**
  * Test Case: ConstructAndAssign
  */
 TEST(vectorIteratorTest, ConstructAndAssign) {
-    // 
-    mystl::vector<int> vec = {1, 2, 3, 4, 5};
-    mystl::vector<int>::iterator it = vec.begin();
+    //
+    mystl::vector<int>           vec = {1, 2, 3, 4, 5};
+    mystl::vector<int>::iterator it  = vec.begin();
 
-    // 
+    //
     EXPECT_EQ(1, *it);
 
     // construct by copy
@@ -475,58 +450,54 @@ TEST(vectorIteratorTest, ConstructAndAssign) {
     EXPECT_EQ(1, *it2);
 }
 
-
 /**
  * Test Case: Dereference
  */
 TEST(vectorIteratorTest, Dereference) {
-    // 
-    mystl::vector<std::string> vec = {"123", "test"};
-    mystl::vector<std::string>::iterator it = vec.begin();
+    //
+    mystl::vector<std::string>           vec = {"123", "test"};
+    mystl::vector<std::string>::iterator it  = vec.begin();
 
-    // 
+    //
     EXPECT_EQ(3, it->size());
     EXPECT_EQ("test", *(++it));
 }
-
 
 /**
  * Test case: Iteratoin
  */
 TEST(vectorIteratorTest, Iteration) {
-    // 
+    //
     mystl::vector<int> vec = {1, 2, 3, 4, 5};
-    int i = 1;
+    int                i   = 1;
 
     for (mystl::vector<int>::iterator it = vec.begin(); it != vec.end(); ++it) {
         EXPECT_EQ(i++, *it);
     }
 }
 
-
 /**
  * Test case: IncrementAndDecrement
  */
 TEST(vectorIteratorTest, IncrementAndDecrement) {
-    // 
-    mystl::vector<int> vec = {1, 2, 3};
-    mystl::vector<int>::iterator it = vec.begin();
+    //
+    mystl::vector<int>           vec = {1, 2, 3};
+    mystl::vector<int>::iterator it  = vec.begin();
 
-    // 
+    //
     EXPECT_EQ(2, *(++it));
     EXPECT_EQ(3, *(++it));
     EXPECT_EQ(2, *(--it));
 }
-
 
 /**
  * Test case: EqualityAndInequality
  */
 TEST(vectorIteratorTest, EqualityAndInequality) {
     mystl::vector<int> vec = {1, 2};
-    auto it1 = vec.begin();
-    auto it2 = vec.begin();
-    auto it3 = vec.end();
+    auto               it1 = vec.begin();
+    auto               it2 = vec.begin();
+    auto               it3 = vec.end();
 
     EXPECT_TRUE(it1 == it2);
     EXPECT_FALSE(it1 != it2);
@@ -534,42 +505,38 @@ TEST(vectorIteratorTest, EqualityAndInequality) {
     EXPECT_FALSE(it1 == it3);
 }
 
-
 /**
  * Test Case: ReverseIterators
  */
 TEST(vectorIteratorTest, ReverseIterators) {
     mystl::vector<int> vec = {1, 2, 3, 4, 5};
-    int i = 5;
+    int                i   = 5;
     for (auto it = vec.rbegin(); it != vec.rend(); ++it, --i) {
         EXPECT_EQ(*it, i);
     }
 }
-
 
 /**
  * Test Case: ConstReverseIterators
  */
 TEST(vectorIteratorTest, ConstReverseIterators) {
     const mystl::vector<int> vec = {1, 2, 3, 4, 5};
-    int i = 5;
+    int                      i   = 5;
     for (auto it = vec.crbegin(); it != vec.crend(); ++it, --i) {
         EXPECT_EQ(*it, i);
     }
 }
-
 
 /**
  * Test Case: Test for random_access_iterator concept in C++20
  */
 TEST(vectorIteratorTest, RandomAccessIteratorCategoryTest) {
     constexpr bool is_random_access = std::random_access_iterator<mystl::vector<int>::iterator>;
-    EXPECT_TRUE(is_random_access) << "mystl::vector::iterator must satisfy the random_access_iterator concept";
+    EXPECT_TRUE(is_random_access) << "mystl::vector::iterator must satisfy the "
+                                     "random_access_iterator concept";
 }
 
-
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
-
